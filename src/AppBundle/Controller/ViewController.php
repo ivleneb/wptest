@@ -8,10 +8,10 @@
 	/**
 	* 
 	*/
-	class wapoController extends Controller
+	class ViewController extends Controller
 	{
 		/**
-		 * @Route("/")
+		 * @Route("/", name="homePage")
 		 * @Route("/index")
 		 */
 		public function indexAction()
@@ -20,7 +20,8 @@
 			$html = $templating->render('wapo/index.html.twig');
 			return new Response($html);*/
 
-			return $this->render('wapo/index.html.twig');
+			//return $this->render('wapo/index.html.twig');
+			return $this->render('base.html.twig');
 		}
 
 		/**
@@ -49,8 +50,6 @@
 		{
 			return $this->render('wapo/freestations.html.twig');
 		}
-
-
 
 	}
 

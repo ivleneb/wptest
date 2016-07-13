@@ -9,7 +9,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ path('app_wapo_index') }}"> {% trans %} WAPOSAT {% endtrans %} </a>
+            <a class="navbar-brand" href="{{ path('app_view_index') }}"> {% trans %} WAPOSAT {% endtrans %} </a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -18,10 +18,10 @@
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> {% trans %} Menú {% endtrans %}  <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="{{ path('app_wapo_index') }}"> {% trans %} Inicio {% endtrans %} </a></li>
-                        <li><a href="{{ path('app_wapo_about') }}"> {% trans %} Acerca {% endtrans %} </a></li>
-                      	<li><a href="{{ path('app_wapo_contact') }}"> {% trans %} Contáctanos {% endtrans %} </a></li>
-                        <li><a href="{{ path('app_wapo_freestations') }}"> {% trans %} Estaciones libres {% endtrans %} </a></li>
+                        <li><a href="{{ path('app_view_index') }}"> {% trans %} Inicio {% endtrans %} </a></li>
+                        <li><a href="{{ path('app_view_about') }}"> {% trans %} Acerca {% endtrans %} </a></li>
+                      	<li><a href="{{ path('app_view_contact') }}"> {% trans %} Contáctanos {% endtrans %} </a></li>
+                        <li><a href="{{ path('app_view_freestations') }}"> {% trans %} Estaciones libres {% endtrans %} </a></li>
                     </ul>
                 </li>
             </ul>

@@ -1,0 +1,68 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Senders
+ *
+ * @ORM\Table(name="Senders")
+ * @ORM\Entity
+ */
+class Senders
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id_sender_type", type="integer", nullable=false)
+     */
+    private $idSenderType;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="mac", type="string", length=30, nullable=false)
+     */
+    private $mac;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="tmp", type="string", length=30, nullable=false)
+     */
+    private $tmp;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="text", length=65535, nullable=false)
+     */
+    private $description;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="creation_date", type="datetime", nullable=false)
+     */
+    private $creationDate = 'CURRENT_TIMESTAMP';
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="active", type="boolean", nullable=false)
+     */
+    private $active = '1';
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id_sender", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $idSender;
+
+
+}
+

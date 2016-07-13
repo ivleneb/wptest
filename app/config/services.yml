@@ -7,3 +7,13 @@ services:
 #    service_name:
 #        class: AppBundle\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+      app.dataloader:
+          class: AppBundle\Service\DataLoader
+          arguments:
+            entityManager: "@doctrine.orm.entity_manager"
+
+      app.mailer:
+          class: AppBundle\Service\Mailer
+          arguments:
+            entityManager: "@doctrine.orm.entity_manager"
+

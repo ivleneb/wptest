@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+     <script src="js/jquery-1.12.4.min.js"></script>  
+    <script type="text/javascript">
+     
+google.charts.load('current', {packages: ['corechart', 'line']});
+
+function drawCurveTypes() {
+ 
+
+$.getJSON('ScriptFrontEnd/Screen1/ParameterData.php',function(data){
+    
+   var datos="[";  
+   
+   var data1 = new google.visualization.DataTable();
+      data1.addColumn('string', 'X');
+      data1.addColumn('number', data.Name);
+      data1.addColumn('number', 'Risk');
+      data1.addColumn('number', 'Danger');
+      
+ var LimitRisk =data.LMP
+ var LimitDanger =data.LMR
+ 
+for(a=0;a<=data.Data.Time.length-1;a++)
+    {
+ datos+="[\""+data.Data.Time[a]+"\","+ data.Data.Value[a]+","+LimitRisk+","+LimitDanger+"],";
+    }
+    
+datos=datos.substr(0,datos.length-1)+"]";
+data1.addRows(JSON.parse(datos));
+
+  var options = {
+        hAxis: {
+          title: 'Tiempo'
+        },
+        vAxis: {viewWindow: {
+            min:0
+          },
+          title: 'Valores'
+        },
+        colors: ['#FF0000', '#0000FF', '#FFFF00']
+      };
+      
+var chart = new google.visualization.LineChart(document.getElementById('chart'));
+chart.draw(data1, options);
+});
+
+
+
+      
+    }
+    
+    </script>
+  </head>
+  <body>
+    <div id="chart" style="width: 900px; height: 500px"></div>
+    <div id="resul"></div>
+    
+    <input type="button" onclick="drawCurveTypes()" value="click" >
+  </body>
+</html>

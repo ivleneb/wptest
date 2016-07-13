@@ -2,11 +2,13 @@
 parameters:
     database_host: 127.0.0.1
     database_port: null
-    database_name: symfony
+    database_name: DB2WAPOSAT
     database_user: root
-    database_password: null
+    database_password: Waposat1_UNI #initec123
     mailer_transport: smtp
-    mailer_host: 127.0.0.1
-    mailer_user: null
-    mailer_password: null
+    mailer_host: smtp.zoho.com
+    mailer_user: juan.basilio@waposat.com
+    mailer_password: juan.initec
+    mailer_encryption: ssl
+    mailer_port: 465
     secret: b838d6a89d4f202b60768a4c09390fcea33edc31
