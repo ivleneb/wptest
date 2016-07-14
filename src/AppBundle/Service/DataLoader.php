@@ -89,11 +89,7 @@
 				$stationA["Sensor"] = $temp;
 
 				return $stationA;
-
-				//return array("id" => $block[0]->getId() , "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "NumDanger"=>$danger, "NumRisk"=>$risk, "RefreshFrecuencySeg"=>$block[0]->getRefresh(), "Sensor"=>$temp);
 				
-				
-
 			} else 
 			{
 				
@@ -105,8 +101,6 @@
 				{
 					$temp[] = $this->LoadAction($cb->getId(), $countEvents, $basic_stat, $lastId, $basic_info, $limits, $long, $addData, $send_Id_Station, $id_user); 
 				}
-
-				//return array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "Hi" => "Holaaa", "NumStationBlocks"=>count($child_blocks), "RefreshFrecuencySeg" => $block[0]->getRefresh(), "StationBlock"=>$temp);
 
 				$blockA = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "Hi" => "Holaaa", "NumStationBlocks"=>count($child_blocks), "RefreshFrecuencySeg" => $block[0]->getRefresh(), "StationBlock"=>$temp);
 
@@ -279,8 +273,7 @@
 
 		}
 
-		public function SensorDataAction($id_Sensor, $id_StationBlock, $basic_stat=0, $lastId=0, $basic_info=0, $limits=0, $long=0, $addData=0, $send_Id_Station=0) 
-		//public function SensorDataAction($id_Sensor, $id_StationBlock, $arg = array("basic_stat"=>0, "lastId"=>0, "basic_info"=>0, "limits"=>0, "long"=>0, "addData"=>0, "send_Id_Station"=>0))
+		public function SensorDataAction($id_Sensor, $id_StationBlock, $basic_stat=0, $lastId=0, $basic_info=0, $limits=0, $long=0, $addData=0, $send_Id_Station=0)
 		{
 			
 			$SensorData = array();
@@ -344,9 +337,7 @@
 
 			if ($basic_stat /*$basic_stat*/) 
 			{
-				/*$dql = "SELECT m.value as Val FROM AppBundle:Measurement m WHERE m.idSensor = ".$Sensor->getIdSensor()." ORDER BY m.idMeasurement DESC";
-				$query = $em->createQuery($dql);
-				$LastVals = $query->setMaxResults($long)->getResult();*/
+
 				$stat = $this->MeanMaxMinValue($LastVals);
 				$SensorData["MeanValue"] = $stat['mean'];
 				$SensorData["MinValue"] = $stat['min']['Val'];
@@ -370,19 +361,11 @@
 			if ($addData/*$addData*/) 
 			{
 				
-				/*$dql = "SELECT m.value as Val FROM AppBundle:Measurement m WHERE m.idSensor = ".$Sensor->getIdSensor()." AND m.idMeasurement > ".$lastId." ORDER BY m.idMeasurement DESC";
-				$query = $em->createQuery($dql);
-				$LastVals = $query->setMaxResults($long)->getResult();	*/
-
 				$lV=array();
 				foreach ($LastVals as $value) 
 				{
 					$lv[]=$value['Val'];
 				}
-
-				/*$dql = "SELECT m.date as timing FROM AppBundle:Measurement m WHERE m.idSensor = ".$Sensor->getIdSensor()." ORDER BY m.idMeasurement DESC";
-				$query = $em->createQuery($dql);
-				$LastDates = $query->setMaxResults($long)->getResult();*/
 
 				$ld=array();
 				foreach ($LastDates as $value) 
@@ -394,12 +377,19 @@
 
 			}
 			
-			
-			return $SensorData;
-					
+			return $SensorData;		
 		}
 
+/*
+		public function selectSensor($id_Station, $num)
+		{
+			$em = $this->entityManager;
+			$dql = "SELECT st_s FROM AppBundle:BlockSensors st_s WHERE st_s.idBlock = ".$$id_Station;
+			$query = $em->createQuery($dql);
+			$station_sensor = $query->getResult();
 
+		}
+*/
 	}
 
  ?>
