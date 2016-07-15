@@ -10,13 +10,26 @@
 		private $entityManager;
 		private $risk2 = array();
 		private $danger2 = array();
+		private $requiredSensors = 4;
+		private $loadSensorData = 0, $basic_stat=0, $basic_info=0, $limits=0, $long=0, $addData=0, $uselastId=0;
 
 		public function __construct(EntityManager $entityManager)
 		{
 			$this->entityManager = $entityManager;
 		}
 
-		public function LoadAction($id_Block, $countEvents, $basic_stat=0, $lastId=0, $basic_info=0, $limits=0, $long=0, $addData=0, $send_Id_Station=0, $id_user=1) 
+		public function retrieveSensorData($basic_info=1, $basic_stat=1, $limits=1, $long=1, $addData=1, $uselastId =1)
+		{
+			$this->loadSensorData = 1;
+			$this->basic_info = $basic_info;
+			$this->basic_stat = $basic_stat;
+			$this->limits = $limits;
+			$this->long = $long;
+			$this->addData = $addData;
+			$this->uselastId = $uselastId;
+		}
+
+		public function LoadAction($id_Block, $countEvents=1, $id_user=1) 
 		{
 			//Obtener objeto bloque
 			$temp = array();
@@ -31,43 +44,43 @@
 			if ($block[0]->getIdBlockType()->getBlockType() == 3) 
 			{
 
-				$dql = "SELECT bs FROM AppBundle:BlockSensors bs WHERE bs.idBlock = ".$block[0]->getId();
+				/*$dql = "SELECT bs FROM AppBundle:BlockSensors bs WHERE bs.idBlock = ".$block[0]->getId();
 				$query = $em->createQuery($dql);
-				$bsensors = $query->getResult();
-				$temp = array();
-				foreach ($bsensors as $s) 
-				{
-					$Sensor = $s->getIdSensor();
+				$bsensors = $query->getResult();*/
 
-					$temp[] = $this->SensorDataAction($Sensor->getIdSensor(), $block[0]->getId(), $basic_stat, $lastId, $basic_info, $limits, $long, $addData, $send_Id_Station);
+				$temp = array();
+
+				if ($this->loadSensorData == 1) 
+				{
+					$temp1 = $this->selectSensors($block[0]->getId());
+
+					foreach($temp1 as $Sensor)
+					{
+						$temp[] = $this->SensorDataAction($Sensor->getIdSensor(), $block[0]->getId());
+					}
 				}
 
 				$stationA = array();
 
 				$stationA["id"] = $block[0]->getId();
-				$stationA["Name"] = $block[0]->getBlockName();
+				/*$stationA["Name"] = $block[0]->getBlockName();
 				$stationA["CodeName"] = $block[0]->getBlockCodeName();
-				$stationA["URL"] = $block[0]->getImage();
+				$stationA["URL"] = $block[0]->getImage();*/
 
-				//$risk2["validate"] = "here!";
+				$this->blockInfo($stationA, $block[0]);
+
+				$dql = "SELECT e FROM AppBundle:MonitoringEvents e, AppBundle:NotificationsAlert n, AppBundle:BlockSensors bs WHERE n.idUser = ".$id_user." AND n.viewed = 0 AND n.idMonitoringEvent = e.idMonitoringEvent AND e.idBlockSensor = bs.id AND bs.idBlock = ".$block[0]->getId();
+				$query = $em->createQuery($dql);
+				$events = $query->getResult();
 
 				if ($countEvents) 
 				{
-					$dql = "SELECT e FROM AppBundle:MonitoringEvents e, AppBundle:NotificationsAlert n, AppBundle:BlockSensors bs WHERE n.idUser = ".$id_user." AND n.viewed = 0 AND n.idMonitoringEvent = e.idMonitoringEvent AND e.idBlockSensor = bs.id AND bs.idBlock = ".$block[0]->getId();
-					$query = $em->createQuery($dql);
-					$events = $query->getResult(); 
-
 					$t = $this->countDangerAndRisks($events);
 					$stationA["NumRisk"] = $t['risk'];
 					$stationA["NumDanger"] = $t['danger'];
 
-					
 				}else
 				{
-					$dql = "SELECT e FROM AppBundle:MonitoringEvents e, AppBundle:NotificationsAlert n, AppBundle:BlockSensors bs WHERE n.idUser = ".$id_user." AND n.viewed = 0 AND n.idMonitoringEvent = e.idMonitoringEvent AND e.idBlockSensor = bs.id AND bs.idBlock = ".$block[0]->getId();
-					$query = $em->createQuery($dql);
-					$events = $query->getResult();
-
 					foreach ($events as $event)
 					{
 						if ($event->getIdEventType()->getAlertType() == 'risk') 
@@ -79,9 +92,6 @@
 						} 
 
 					}
-					
-					//$risk2["validate"] = "here!";
-
 				}
 
 
@@ -99,7 +109,7 @@
 
 				foreach ($child_blocks as $cb) 
 				{
-					$temp[] = $this->LoadAction($cb->getId(), $countEvents, $basic_stat, $lastId, $basic_info, $limits, $long, $addData, $send_Id_Station, $id_user); 
+					$temp[] = $this->LoadAction($cb->getId(), $countEvents, $id_user); 
 				}
 
 				$blockA = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "Hi" => "Holaaa", "NumStationBlocks"=>count($child_blocks), "RefreshFrecuencySeg" => $block[0]->getRefresh(), "StationBlock"=>$temp);
@@ -257,25 +267,8 @@
 			return array('risk'=>$risk, 'danger'=>$danger);
 		}
 
-		public function MeanMaxMinValue($LastVals=null)
+		public function SensorDataAction($id_Sensor, $id_StationBlock)
 		{
-			$mean = $cont = 0;
-			$minVal = $maxVal = $LastVals[0];
-
-			foreach ($LastVals as $value) 
-			{
-				$mean = $mean + $value['Val'];
-				if ($value>$maxVal) {$maxVal = $value;} else if ($value<$minVal){$minVal = $value;} 
-				$cont++;
-			}
-
-			return array("mean"=>$mean/$cont,"max"=>$maxVal, "min"=>$minVal);
-
-		}
-
-		public function SensorDataAction($id_Sensor, $id_StationBlock, $basic_stat=0, $lastId=0, $basic_info=0, $limits=0, $long=0, $addData=0, $send_Id_Station=0)
-		{
-			
 			$SensorData = array();
 
 			//Obtener objeto BSensor
@@ -290,31 +283,24 @@
 
 			$SensorData["id"] = $Sensor->getIdSensor();
 
-			if ($send_Id_Station/*$send_Id_Station*/) 
-			{
+			/*if ($send_Id_Station/*$send_Id_Station*///) 
+			/*{
 				$SensorData["idStationBlock"] = $Bsensor->getId();
+			}*/
+
+			if ($this->basic_info) 
+			{
+				$this->sensorInfo($SensorData, $Bsensor);
 			}
 
-			if ($basic_info/*$basic_info*/) 
+			if ($this->limits) 
 			{
-				$SensorData["Name"] = $SensorModel->getIdParameter()->getParameterName();
-				$SensorData["CodeName"] = $Sensor->getCodename();
-				$SensorData["Unit"] = $SensorModel->getIdMeasurementUnit()->getCode();
-			}
-
-			if ($limits /*$limits*/) 
-			{
-				$maxLimit = $SensorModel->getMaxLimit();
-				$maxDanger = $Bsensor->getUpDangerLimit();
-				$maxRisk = $Bsensor->getUpRiskLimit();
-				$SensorData["MP"] = $maxLimit;
-				$SensorData["LMP"] = $maxDanger;
-				$SensorData["LMR"] = $maxRisk;
-
+				$this->sensorLimits($SensorData, $Bsensor);
 			}
 
 			$LastVals = $LastDates = null;
-			if ($lastId /*$idSensor*/) 
+			$lastId = $this->uselastId;
+			if ($lastId) 
 			{
 				$dql = "SELECT m.value as Val FROM AppBundle:Measurement m WHERE m.idSensor = ".$Sensor->getIdSensor()." AND m.idMeasurement > ".$lastId." ORDER BY m.idMeasurement DESC";
 				$query = $em->createQuery($dql);
@@ -335,16 +321,12 @@
 				$LastDates = $query->setMaxResults($long)->getResult();
 			}
 
-			if ($basic_stat /*$basic_stat*/) 
+			if ($this->basic_stat) 
 			{
-
-				$stat = $this->MeanMaxMinValue($LastVals);
-				$SensorData["MeanValue"] = $stat['mean'];
-				$SensorData["MinValue"] = $stat['min']['Val'];
-				$SensorData["MaxValue"] = $stat['max']['Val'];
+				$this->sensorBasicStat($SensorData, $LastVals);
 			}
 
-			if ($long /*$long*/) 
+			if ($this->long) 
 			{
 				$long = count($LastVals);
 				$SensorData["Long"] = $long;	
@@ -358,38 +340,126 @@
 			$SensorData["Last"] = array("id"=>$lastMeasure[0]->getIdMeasurement(),"Value"=>$lastMeasure[0]->getValue(),"Date"=>$lastMeasure[0]->getDate()->format('M-d H:i:s'));
 
 			//Data from last Sensor measurement
-			if ($addData/*$addData*/) 
+			if ($this->addData) 
 			{
-				
-				$lV=array();
-				foreach ($LastVals as $value) 
-				{
-					$lv[]=$value['Val'];
-				}
-
-				$ld=array();
-				foreach ($LastDates as $value) 
-				{
-					$ld[]=$value['timing']->format('H:i:s');
-				}
-
-				$SensorData["Data"] = array("Time"=> $ld, "Value"=> $lv);
-
+				$this->addNotifications( $SensorData, $LastVals, $LastDates);
 			}
 			
 			return $SensorData;		
 		}
 
-/*
-		public function selectSensor($id_Station, $num)
+
+		public function selectSensors($id_Station, $num=4)
 		{
 			$em = $this->entityManager;
-			$dql = "SELECT st_s FROM AppBundle:BlockSensors st_s WHERE st_s.idBlock = ".$$id_Station;
+			$dql = "SELECT st_s FROM AppBundle:BlockSensors st_s WHERE st_s.idBlock = ".$id_Station;
 			$query = $em->createQuery($dql);
 			$station_sensor = $query->getResult();
 
+			$relevance = array();
+
+			foreach ($station_sensor as $s) 
+			{
+				$sensor = $s->getIdSensor();
+				$dql = "SELECT m FROM AppBundle:Measurement m WHERE m.idSensor = ".$sensor->getIdSensor()." ORDER BY m.idMeasurement DESC";
+				$measurement = $em->createQuery($dql)->setMaxResults(1)->getResult();
+
+				$key = abs(($measurement[0]->getValue() - $s->getUpDangerLimit())/($s->getUpDangerLimit()));
+
+				$relevance[$key] = $sensor;
+
+			}
+
+			ksort($relevance);
+			$temp = array();
+
+			if (count($relevance)>$num) 
+			{	
+				$counter = 0;
+				foreach ($relevance as $s) 
+				{
+					$temp[] = $obj;
+					$counter++;
+					if ($counter == $num) {break;}
+				}
+			}
+			else
+			{
+				foreach ($relevance as $key => $obj) 
+				{
+					$temp[] = $obj;
+				}
+			}
+			return $temp;
 		}
-*/
+
+
+		public function blockInfo( &$stationA, $block = null )
+		{
+			$stationA["Name"] = $block->getBlockName();
+			$stationA["CodeName"] = $block->getBlockCodeName();
+			$stationA["RefreshFrecuencySeg"] = $block->getRefresh();
+			$stationA["URL"] = $block->getImage();
+			//$stationA["ParentBlock"] = $block->getIdParentBlock();
+		}
+
+		public function sensorInfo(&$sensorA, $bSensor = null )
+		{
+			$sensor = $bSensor->getIdSensor();
+			$sensorA['Name'] = $sensor->getIdSensorModel()->getIdParameter()->getParameterName();
+			$sensorA['CodeName'] = $sensor->getCodename();
+			$sensorA['Unit'] = $sensor->getIdSensorModel()->getIdMeasurementUnit()->getCode();
+			$sensorA['idStationBlock'] = $bSensor->getIdBlock()->getId();
+		}
+
+		public function sensorBasicStat(&$SensorData, $LastVals)
+		{
+			$stat = $this->MeanMaxMinValue($LastVals);
+			$SensorData["MeanValue"] = $stat['mean'];
+			$SensorData["MinValue"] = $stat['min']['Val'];
+			$SensorData["MaxValue"] = $stat['max']['Val'];
+		}
+
+		public function sensorLimits( &$SensorData, $Bsensor = null )
+		{
+			$SensorData["MP"] = $Bsensor->getIdSensor()->getIdSensorModel()->getMaxLimit();
+			$SensorData["LMP"] = $Bsensor->getUpDangerLimit();
+			$SensorData["LMR"] = $Bsensor->getUpRiskLimit();
+		}
+
+		public function addNotifications( &$SensorData, $LastVals = null, $LastDates = null)
+		{
+			$lV=array();
+			foreach ($LastVals as $value) 
+			{
+				$lv[]=$value['Val'];
+			}
+
+			$ld=array();
+			foreach ($LastDates as $value) 
+			{
+				$ld[]=$value['timing']->format('H:i:s');
+			}
+
+			$SensorData["Data"] = array("Time"=> $ld, "Value"=> $lv);
+		}
+
+		public function MeanMaxMinValue($LastVals=null)
+		{
+			$mean = $cont = 0;
+			$minVal = $maxVal = $LastVals[0];
+
+			foreach ($LastVals as $value) 
+			{
+				$mean = $mean + $value['Val'];
+				if ($value>$maxVal) {$maxVal = $value;} else if ($value<$minVal){$minVal = $value;} 
+				$cont++;
+			}
+
+			return array("mean"=>$mean/$cont,"max"=>$maxVal, "min"=>$minVal);
+
+		}
+
 	}
 
  ?>

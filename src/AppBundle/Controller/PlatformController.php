@@ -23,15 +23,15 @@
 		{
 			
 			//Verify is user is logged
-			/*if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
+			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
 			{
         		throw $this->createAccessDeniedException();
     		}
     		$user = $this->getUser();
 			
     		$welcome = "Hola ".$user->getName()." time to monitor your sea";
-			*/
-			$welcome = "HIIIIII";
+			
+			//$welcome = "HIIIIII";
     		$danger = 0; $risk = 0;
 			
     		$em = $this->getDoctrine()->getManager();
@@ -88,6 +88,9 @@
 
     		$StaticInfo = array('HiUser'=>$welcome, 'NumDanger'=>$danger, 'NumRisk'=>$risk, 'ProcessBlock'=>$MonitorBlock);
 
+    		/*$lD = $this->get('app.dataloader');
+    		$StaticInfo =
+*/
     		return new Response(json_encode($StaticInfo));
     		//return new Response(json_encode($temp));
     		//$jsonContent = $serializer->serialize($temp, 'json');
@@ -102,15 +105,18 @@
 		public function processBlockAction($idProcess)
 		{
 			//Verify is user is logged
-			/*if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
+			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
 			{
         		throw $this->createAccessDeniedException();
     		}
     		$user = $this->getUser();
-			*/
+			
 			
 			$lD = $this->get('app.dataloader');
-			$Process = $lD->LoadAction($idProcess, 1, 0, 0, 1, 0, 0, 0, 0/*, $idUser*/);
+
+			$lD->retrieveSensorData();
+
+			$Process = $lD->LoadAction($idProcess, $user->getId());
 
 			/*$encoders = array(new JsonEncoder());
 			$normalizers = array(new ObjectNormalizer());
@@ -128,12 +134,11 @@
 		public function processBlockUpdateAction($idProcess)
 		{
 			//Verify is user is logged
-			/*if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
+			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
 			{
         		throw $this->createAccessDeniedException();
     		}
     		$user = $this->getUser();
-			*/
 			
 			$lD = $this->get('app.dataloader');
 			$Process = $lD->UpdateAction($idProcess, 1, 0, 0, 1, 0, 0, 0, 0/*, $idUser*/);
@@ -148,12 +153,11 @@
 		public function stationBlockAction($idStation)
 		{
 			//Verify is user is logged
-			/*if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
+			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
 			{
         		throw $this->createAccessDeniedException();
     		}
     		$user = $this->getUser();
-			*/
 			
 			$lD = $this->get('app.dataloader');
 			$Station = $lD->LoadAction($idStation, 1, 1, 0, 1, 1, 20, 0, 0 /*, $idUser*/);
@@ -168,12 +172,11 @@
 		public function stationBlockUpdateAction($idStation)
 		{
 			//Verify is user is logged
-			/*if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
+			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
 			{
         		throw $this->createAccessDeniedException();
     		}
     		$user = $this->getUser();
-			*/
 			
 			$lD = $this->get('app.dataloader');
 			$Station = $lD->UpdateAction($idStation, 1, 0, 0, 0, 0, 0, 0, 0/*, $idUser*/);
@@ -188,12 +191,11 @@
 		public function sensorDataAction($idSensor, $idStation, $long)
 		{
 			//Verify is user is logged
-			/*if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
+			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
 			{
         		throw $this->createAccessDeniedException();
     		}
     		$user = $this->getUser();
-			*/
 			
 			$lD = $this->get('app.dataloader');
 			$Station = $lD->SensorDataAction($idSensor, 1, 1, 0, 1, 1, 3, 1, 1);
@@ -208,12 +210,11 @@
 		public function sensorDataUpdateAction($idSensor, $idStation, $lastId)
 		{
 			//Verify is user is logged
-			/*if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
+			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
 			{
         		throw $this->createAccessDeniedException();
     		}
     		$user = $this->getUser();
-			*/
 			
 			$lD = $this->get('app.dataloader');
 			$Station = $lD->SensorDataAction($idSensor, 1, 0, 1, 0, 0, 1, 1, 1);
@@ -228,12 +229,11 @@
 		public function AlertAction()
 		{
 			//Verify is user is logged
-			/*if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
+			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
 			{
         		throw $this->createAccessDeniedException();
     		}
     		$user = $this->getUser();
-			*/
 			
 			$lD = $this->get('app.dataloader');
 			$Station = $lD->AlertDataAction(/*, $idUser*/);
@@ -248,12 +248,11 @@
 		public function AlertUpdateAction()
 		{
 			//Verify is user is logged
-			/*if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
+			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
 			{
         		throw $this->createAccessDeniedException();
     		}
     		$user = $this->getUser();
-			*/
 			
 			$lD = $this->get('app.dataloader');
 			$Station = $lD->AlertDataAction(1/*, $idUser*/);

@@ -208,23 +208,28 @@ class appDevUrlMatcher extends Symfony\Bundle\FrameworkBundle\Routing\Redirectab
 
         }
 
+        // app_security_login
+        if (rtrim($pathinfo, '/') === '') {
+            if (substr($pathinfo, -1) !== '/') {
+                return $this->redirect($pathinfo.'/', 'app_security_login');
+            }
+
+            return array (  '_controller' => 'AppBundle\\Controller\\SecurityController::loginAction',  '_route' => 'app_security_login',);
+        }
+
         // login
         if ($pathinfo === '/login') {
             return array (  '_controller' => 'AppBundle\\Controller\\SecurityController::loginAction',  '_route' => 'login',);
         }
 
-        // homePage
-        if (rtrim($pathinfo, '/') === '') {
-            if (substr($pathinfo, -1) !== '/') {
-                return $this->redirect($pathinfo.'/', 'homePage');
-            }
-
-            return array (  '_controller' => 'AppBundle\\Controller\\ViewController::indexAction',  '_route' => 'homePage',);
+        // alert
+        if ($pathinfo === '/alertas') {
+            return array (  '_controller' => 'AppBundle\\Controller\\ViewController::indexAction',  '_route' => 'alert',);
         }
 
-        // app_view_index
-        if ($pathinfo === '/index') {
-            return array (  '_controller' => 'AppBundle\\Controller\\ViewController::indexAction',  '_route' => 'app_view_index',);
+        // scada
+        if ($pathinfo === '/scada') {
+            return array (  '_controller' => 'AppBundle\\Controller\\ViewController::indexAction',  '_route' => 'scada',);
         }
 
         // app_view_about

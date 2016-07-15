@@ -32,29 +32,7 @@ $("footer").html('Copyright &copy; Waposat 2016');
 
 });
 
-function LoadLogin()
-{
-$("section").html('<div class=Login>\n\
-<img src="img/waposat-logo.png">\n\
-<form id=formulario>\n\
-<div class=BoxLogin><i class="fa fa-user" aria-hidden="true"></i><input id="user" name="user" type="text" placeholder="Usuario"></div>\n\
-<div class=BoxLogin><i class="fa fa-lock" aria-hidden="true"></i><input id="password" name="password" type="password" placeholder="Contraseña"></div>\n\
-<div class=Recordar><label><input type=checkbox value=1 name=recordar> Recordar Contraseña</label></div>\n\
-<input type="button" class=ButtonEnter onclick=Login() value="Ingresar"></form>\n\
-</div>\n\
-<div class=LoginInfo>Olvide mi contraseña &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Necesito una cuenta\n\
-<div class=Respuesta id=respuesta></div>\n\
-</div>');
-    
-$('input[type=text],input[type=password]').on('keydown', function(e) {
-       
-    if (e.which == 13) {
-        e.preventDefault();
-        Login();
-    }
-});
 
-}
 
 function leerdatos(){
 $.getJSON('ScriptFrontEnd/Screen1/MonitorBlock.php',$('#formulario').serialize(), function(data) {
@@ -192,7 +170,7 @@ drawCurveTypes('ChartLines',330,200,datos,data.Name);
 function LoadNav(type = 1)
 {
 
- $.post("/monitor/dashboard",$("#formulario").serialize(), function(response) {
+ $.post("/dashboard",$("#formulario").serialize(), function(response) {
      
    var data= jQuery.parseJSON(response);
    
@@ -222,7 +200,7 @@ if(type==1)
 {     
    items.push('<div id="bloques" onclick=pushLeft.close()>BLOQUES <i class="fa fa-arrow-right" aria-hidden="true"></i></div>');
      
-  $.each(data.MonitorBlock, function(key, val) {
+  $.each(data.ProcessBlock, function(key, val) {
     items.push('<a id=\'link' + val.Id +'\' >' + val.Name +'<br />' + val.CodeName +'</a>');
    });
    

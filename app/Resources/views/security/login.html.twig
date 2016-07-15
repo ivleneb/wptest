@@ -1,45 +1,34 @@
-{% extends 'base2.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block stylesheets %}
     {{parent()}}
-    <link rel="stylesheet" type="text/css" href="{{ asset('public/css/style2.css') }}">
-    <link href='https://fonts.googleapis.com/css?family=New+Rocker' rel='stylesheet' type='text/css'>
+    
 {% endblock %}
 
 {% block body %}
-{% if error %}
-    <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-{% endif %}
-<div class="image-container col-xs-6 col-md-6" style="height: 100vh;">
-    <img src="{{ asset('river2.png') }}" height="120%">
-</div>
-<div class=" col-xs-6 col-md-6 text-center center-block">
-    <figure>
-        <img src="{{ asset('Gota_Waposat_117x147.png') }}">
-        <figcaption style="margin-left: 20%;margin-right: 20%;">
-            <h2 class="rock bigFont azulwapo">LogIn</h2>
-            <h3>To mark your attendance just type your data or passes your card</h3>
-        </figcaption>
-    </figure>
-    <form action="{{ path('login') }}" method="post" class="col-md-4 col-md-offset-4" style="margin-top: 40px;">
-        <div class="form-group">
-            <label for="username" class="col-sm-2 control-label">Email:</label>
-            <!--<div class="col-sm-10">-->
-            <input type="text" class="form-control" id="username" name="_username" value="{{ last_username }}" />
-           <!-- </div>-->    
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        {% endif %}
+
+        <div class=Login>
+        <img src="{{ asset('public/img/waposat-logo.png') }}">
+        <form id=formulario action="{{ path('login') }}" method="post">
+        <div class=BoxLogin><i class="fa fa-user" aria-hidden="true"></i><input id="username" name="_username"  type="text" placeholder="Usuario"></div>
+        <div class=BoxLogin><i class="fa fa-lock" aria-hidden="true"></i><input id="password" id="password" name="_password" placeholder="Contraseña"></div>
+        <div class=Recordar>
+             <label><input type="radio" name="_target_path" value="alert"> Alertas</label>
+             <label><input type="radio" name="_target_path" value="scada"> Scada</label><br>
+        <!--
+            <label><input type=checkbox value=1 name=recordar> Recordar Contraseña</label>
+        -->
         </div>
-        <div class="form-group">
-            <label for="password" class="col-sm-2 control-label">Password:</label>
-            <input type="password" class="form-control" id="password" name="_password" />   
+        <input  type="submit" class=ButtonEnter onclick=Login() value="Ingresar">
+        </form>
         </div>
-        <input type="hidden" name="_target_path" value="homePage" />
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" class="btn btn-default">login</button>
-            </div>    
+        <div class=LoginInfo>Olvide mi contraseña &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Necesito una cuenta
+        <div class=Respuesta id="respuesta"></div>
         </div>
-    </form>
-</div>
-    
+
 {% endblock %}
 

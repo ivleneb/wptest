@@ -4,6 +4,8 @@
 	use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 	use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 	use Symfony\Component\HttpFoundation\Response;
+	use Symfony\Component\HttpFoundation\Request;
+
 
 	/**
 	* 
@@ -11,8 +13,8 @@
 	class ViewController extends Controller
 	{
 		/**
-		 * @Route("/", name="homePage")
-		 * @Route("/index")
+		 * @Route("/alertas", name="alert")
+		 * @Route("/scada", name="scada" )
 		 */
 		public function indexAction()
 		{
@@ -21,7 +23,25 @@
 			return new Response($html);*/
 
 			//return $this->render('wapo/index.html.twig');
-			return $this->render('base.html.twig');
+
+
+
+			$request = Request::createFromGlobals();
+			$path = $request->getPathInfo();
+			$var = 1;
+			if ($path == "/alertas") 
+			{
+				$var = 1;
+			} else 
+			{
+				$var = 2;
+			}
+			
+			//$var = $request->request->get('_target', 'default value if bar does not exist');
+
+			//$var = $_POST['_url'];
+
+			return $this->render('index.html.twig', array("seleccion"=>$var, "path"=>$path));
 		}
 
 		/**
