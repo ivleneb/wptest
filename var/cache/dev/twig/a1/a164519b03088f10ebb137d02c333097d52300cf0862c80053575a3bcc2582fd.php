@@ -22,20 +22,20 @@ class __TwigTemplate_06da92e5c7a32b856aa2b1aba881b6660a25925a4a79812f53958421993
 
     protected function doDisplay(array $context, array $blocks = array())
     {
-        $__internal_267f627f5fc6f3f13afae10ae51ab3fc73047d93eecdfb98cec7308d4a2586da = $this->env->getExtension("native_profiler");
-        $__internal_267f627f5fc6f3f13afae10ae51ab3fc73047d93eecdfb98cec7308d4a2586da->enter($__internal_267f627f5fc6f3f13afae10ae51ab3fc73047d93eecdfb98cec7308d4a2586da_prof = new Twig_Profiler_Profile($this->getTemplateName(), "template", "security/login.html.twig"));
+        $__internal_95544ef115019edbebd2a7e557e70c288301ebb6007abe6250e00b7dc58f28cf = $this->env->getExtension("native_profiler");
+        $__internal_95544ef115019edbebd2a7e557e70c288301ebb6007abe6250e00b7dc58f28cf->enter($__internal_95544ef115019edbebd2a7e557e70c288301ebb6007abe6250e00b7dc58f28cf_prof = new Twig_Profiler_Profile($this->getTemplateName(), "template", "security/login.html.twig"));
 
         $this->parent->display($context, array_merge($this->blocks, $blocks));
         
-        $__internal_267f627f5fc6f3f13afae10ae51ab3fc73047d93eecdfb98cec7308d4a2586da->leave($__internal_267f627f5fc6f3f13afae10ae51ab3fc73047d93eecdfb98cec7308d4a2586da_prof);
+        $__internal_95544ef115019edbebd2a7e557e70c288301ebb6007abe6250e00b7dc58f28cf->leave($__internal_95544ef115019edbebd2a7e557e70c288301ebb6007abe6250e00b7dc58f28cf_prof);
 
     }
 
     // line 3
     public function block_stylesheets($context, array $blocks = array())
     {
-        $__internal_6087275317556a62bf0db5eeb04157a133ce983fe7375c3837153ff88a66de48 = $this->env->getExtension("native_profiler");
-        $__internal_6087275317556a62bf0db5eeb04157a133ce983fe7375c3837153ff88a66de48->enter($__internal_6087275317556a62bf0db5eeb04157a133ce983fe7375c3837153ff88a66de48_prof = new Twig_Profiler_Profile($this->getTemplateName(), "block", "stylesheets"));
+        $__internal_aa0f0b9f5134c8473e04a295bad54683f900b0e00df12e794b14ea6828cc8516 = $this->env->getExtension("native_profiler");
+        $__internal_aa0f0b9f5134c8473e04a295bad54683f900b0e00df12e794b14ea6828cc8516->enter($__internal_aa0f0b9f5134c8473e04a295bad54683f900b0e00df12e794b14ea6828cc8516_prof = new Twig_Profiler_Profile($this->getTemplateName(), "block", "stylesheets"));
 
         // line 4
         echo "    ";
@@ -44,15 +44,15 @@ class __TwigTemplate_06da92e5c7a32b856aa2b1aba881b6660a25925a4a79812f53958421993
     
 ";
         
-        $__internal_6087275317556a62bf0db5eeb04157a133ce983fe7375c3837153ff88a66de48->leave($__internal_6087275317556a62bf0db5eeb04157a133ce983fe7375c3837153ff88a66de48_prof);
+        $__internal_aa0f0b9f5134c8473e04a295bad54683f900b0e00df12e794b14ea6828cc8516->leave($__internal_aa0f0b9f5134c8473e04a295bad54683f900b0e00df12e794b14ea6828cc8516_prof);
 
     }
 
     // line 8
     public function block_body($context, array $blocks = array())
     {
-        $__internal_6d0950e6680357be7af0af60b9356de879559659dca3702993d7df273f564241 = $this->env->getExtension("native_profiler");
-        $__internal_6d0950e6680357be7af0af60b9356de879559659dca3702993d7df273f564241->enter($__internal_6d0950e6680357be7af0af60b9356de879559659dca3702993d7df273f564241_prof = new Twig_Profiler_Profile($this->getTemplateName(), "block", "body"));
+        $__internal_dd9fd38ee9f40eb9c786131c74087ffd40b1c1c9c2eeb24f57374b029db4055b = $this->env->getExtension("native_profiler");
+        $__internal_dd9fd38ee9f40eb9c786131c74087ffd40b1c1c9c2eeb24f57374b029db4055b->enter($__internal_dd9fd38ee9f40eb9c786131c74087ffd40b1c1c9c2eeb24f57374b029db4055b_prof = new Twig_Profiler_Profile($this->getTemplateName(), "block", "body"));
 
         // line 9
         echo "
@@ -67,14 +67,13 @@ class __TwigTemplate_06da92e5c7a32b856aa2b1aba881b6660a25925a4a79812f53958421993
         }
         // line 13
         echo "
-
         <div class=Login>
         <img src=\"";
-        // line 16
+        // line 15
         echo twig_escape_filter($this->env, $this->env->getExtension('asset')->getAssetUrl("public/img/waposat-logo.png"), "html", null, true);
         echo "\">
         <form id=formulario action=\"";
-        // line 17
+        // line 16
         echo $this->env->getExtension('routing')->getPath("login");
         echo "\" method=\"post\">
         <div class=BoxLogin><i class=\"fa fa-user\" aria-hidden=\"true\"></i><input id=\"username\" name=\"_username\"  type=\"text\" placeholder=\"Usuario\"></div>
@@ -95,7 +94,7 @@ class __TwigTemplate_06da92e5c7a32b856aa2b1aba881b6660a25925a4a79812f53958421993
 
 ";
         
-        $__internal_6d0950e6680357be7af0af60b9356de879559659dca3702993d7df273f564241->leave($__internal_6d0950e6680357be7af0af60b9356de879559659dca3702993d7df273f564241_prof);
+        $__internal_dd9fd38ee9f40eb9c786131c74087ffd40b1c1c9c2eeb24f57374b029db4055b->leave($__internal_dd9fd38ee9f40eb9c786131c74087ffd40b1c1c9c2eeb24f57374b029db4055b_prof);
 
     }
 
@@ -111,7 +110,7 @@ class __TwigTemplate_06da92e5c7a32b856aa2b1aba881b6660a25925a4a79812f53958421993
 
     public function getDebugInfo()
     {
-        return array (  78 => 17,  74 => 16,  69 => 13,  63 => 11,  61 => 10,  58 => 9,  52 => 8,  41 => 4,  35 => 3,  11 => 1,);
+        return array (  77 => 16,  73 => 15,  69 => 13,  63 => 11,  61 => 10,  58 => 9,  52 => 8,  41 => 4,  35 => 3,  11 => 1,);
     }
 }
 /* {% extends 'base.html.twig' %}*/
@@ -126,7 +125,6 @@ class __TwigTemplate_06da92e5c7a32b856aa2b1aba881b6660a25925a4a79812f53958421993
 /*         {% if error %}*/
 /*             <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>*/
 /*         {% endif %}*/
-/* */
 /* */
 /*         <div class=Login>*/
 /*         <img src="{{ asset('public/img/waposat-logo.png') }}">*/

@@ -10,15 +10,18 @@
 		private $entityManager;
 		private $risk2 = array();
 		private $danger2 = array();
+		private $riskS = 0, $dangerS = 0;
+		private $riskP = 0, $dangerP = 0;
 		private $requiredSensors = 4;
-		private $loadSensorData = 0, $basic_stat=0, $basic_info=0, $limits=0, $long=0, $addData=0, $uselastId=0;
+		private $loadStationData = 0, $loadProcessData = 0, $loadSensorData = 0;
+		private $basic_stat=0, $basic_info=0, $limits=0, $long=0, $addData=0, $uselastId=0;
 
 		public function __construct(EntityManager $entityManager)
 		{
 			$this->entityManager = $entityManager;
 		}
 
-		public function retrieveSensorData($basic_info=1, $basic_stat=1, $limits=1, $long=1, $addData=1, $uselastId =1)
+		public function retrieveSensorData($basic_info=1, $basic_stat=1, $limits=1, $long=1, $addData=1, $uselastId =0)
 		{
 			$this->loadSensorData = 1;
 			$this->basic_info = $basic_info;
@@ -29,7 +32,17 @@
 			$this->uselastId = $uselastId;
 		}
 
-		public function LoadAction($id_Block, $countEvents=1, $id_user=1) 
+		public function retrieveStationData()
+		{
+			$this->loadStationData = 1;
+		}
+
+		public function retrieveProcessData()
+		{
+			$this->loadProcessData = 1;
+		}
+
+		public function LoadAction($id_Block, $id_user=1, $countEvents=1) 
 		{
 			//Obtener objeto bloque
 			$temp = array();
@@ -38,67 +51,68 @@
 			$query = $em->createQuery($dql);
 			$block = $query->getResult();
 
-			//$risk2 = array();
-			//$danger2 = array();
-
 			if ($block[0]->getIdBlockType()->getBlockType() == 3) 
 			{
 
-				/*$dql = "SELECT bs FROM AppBundle:BlockSensors bs WHERE bs.idBlock = ".$block[0]->getId();
-				$query = $em->createQuery($dql);
-				$bsensors = $query->getResult();*/
+				//if ($this->loadStationData == 1) 
+				//{
+					$stationA = array();
 
-				$temp = array();
+					$stationA["id"] = $block[0]->getId();
 
-				if ($this->loadSensorData == 1) 
-				{
-					$temp1 = $this->selectSensors($block[0]->getId());
+					$this->blockInfo($stationA, $block[0]);
 
-					foreach($temp1 as $Sensor)
+					$dql = "SELECT e FROM AppBundle:MonitoringEvents e, AppBundle:NotificationsAlert n, AppBundle:BlockSensors bs WHERE n.idUser = ".$id_user." AND n.viewed = 0 AND n.idMonitoringEvent = e.idMonitoringEvent AND e.idBlockSensor = bs.id AND bs.idBlock = ".$block[0]->getId();
+					$query = $em->createQuery($dql);
+					$events = $query->getResult();
+
+					if ($countEvents) 
 					{
-						$temp[] = $this->SensorDataAction($Sensor->getIdSensor(), $block[0]->getId());
-					}
-				}
+						$t = $this->countDangerAndRisks($events);
+						$stationA["NumRisk"] = $t['risk'];
+						$stationA["NumDanger"] = $t['danger'];
+						$this->riskS = $this->riskS + $t['risk'];
+						$this->dangerS = $this->dangerS + $t['danger'];
 
-				$stationA = array();
-
-				$stationA["id"] = $block[0]->getId();
-				/*$stationA["Name"] = $block[0]->getBlockName();
-				$stationA["CodeName"] = $block[0]->getBlockCodeName();
-				$stationA["URL"] = $block[0]->getImage();*/
-
-				$this->blockInfo($stationA, $block[0]);
-
-				$dql = "SELECT e FROM AppBundle:MonitoringEvents e, AppBundle:NotificationsAlert n, AppBundle:BlockSensors bs WHERE n.idUser = ".$id_user." AND n.viewed = 0 AND n.idMonitoringEvent = e.idMonitoringEvent AND e.idBlockSensor = bs.id AND bs.idBlock = ".$block[0]->getId();
-				$query = $em->createQuery($dql);
-				$events = $query->getResult();
-
-				if ($countEvents) 
-				{
-					$t = $this->countDangerAndRisks($events);
-					$stationA["NumRisk"] = $t['risk'];
-					$stationA["NumDanger"] = $t['danger'];
-
-				}else
-				{
-					foreach ($events as $event)
+					}else
 					{
-						if ($event->getIdEventType()->getAlertType() == 'risk') 
+						foreach ($events as $event)
 						{
-							$this->risk2[] = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "SensorName" => $event->getIdMeasurement()->getIdSensor()->getCodename(), "IdSensor" => $event->getIdMeasurement()->getIdSensor()->getIdSensor());  
-						} else if ($event->getIdEventType()->getAlertType() == 'danger') 
-						{
-							$this->danger2[] = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "SensorName" => $event->getIdMeasurement()->getIdSensor()->getCodename(), "IdSensor" => $event->getIdMeasurement()->getIdSensor()->getIdSensor());    
-						} 
+							if ($event->getIdEventType()->getAlertType() == 'risk') 
+							{
+								$this->risk2[] = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "SensorName" => $event->getIdMeasurement()->getIdSensor()->getCodename(), "IdSensor" => $event->getIdMeasurement()->getIdSensor()->getIdSensor());  
+							} else if ($event->getIdEventType()->getAlertType() == 'danger') 
+							{
+								$this->danger2[] = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "SensorName" => $event->getIdMeasurement()->getIdSensor()->getCodename(), "IdSensor" => $event->getIdMeasurement()->getIdSensor()->getIdSensor());    
+							} 
 
+						}
 					}
-				}
 
+					$stationA["RefreshFrecuencySeg"] = $block[0]->getRefresh();
 
-				$stationA["RefreshFrecuencySeg"] = $block[0]->getRefresh();
-				$stationA["Sensor"] = $temp;
+					$temp = array();
 
-				return $stationA;
+					if ($this->loadSensorData == 1) 
+					{
+						$temp1 = $this->selectSensors($block[0]->getId());
+
+				 		foreach($temp1 as $Sensor)
+						{
+							$temp[] = $this->SensorDataAction($Sensor->getIdSensor(), $block[0]->getId());
+						}
+
+						$stationA["Sensor"] = $temp;
+					}
+
+					return $stationA;
+
+				//} else 
+				//{
+				//	return;
+				//}
+				
+
 				
 			} else 
 			{
@@ -112,11 +126,50 @@
 					$temp[] = $this->LoadAction($cb->getId(), $countEvents, $id_user); 
 				}
 
-				$blockA = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "Hi" => "Holaaa", "NumStationBlocks"=>count($child_blocks), "RefreshFrecuencySeg" => $block[0]->getRefresh(), "StationBlock"=>$temp);
+				if ($block[0]->getIdBlockType()->getBlockType() == 1) 
+				{
+					$blockA = array("Hi" => "Holaaa");
+				}else
+				{
+					$blockA = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "Hi" => "Holaaa", "NumStationBlocks"=>count($child_blocks), "RefreshFrecuencySeg" => $block[0]->getRefresh());
+				}
 
-				if (!$countEvents) {
-					$blockA["Danger"] = $this->danger2;
-					$blockA["Risk"] = $this->risk2;
+				
+
+				if ($block[0]->getIdBlockType()->getBlockType() == 2 && $this->loadStationData) 
+				{
+					$blockA["StationBlock"] = $temp;
+				}
+				else if ($block[0]->getIdBlockType()->getBlockType() == 1 && $this->loadProcessData) 
+				{
+					$blockA["ProcessBlock"] = $temp;
+				}
+
+
+				if ($countEvents) 
+				{
+
+
+					if ($block[0]->getIdBlockType()->getBlockType() == 2) 
+					{
+						$blockA["NumDanger"] = $this->dangerS;
+						$blockA["NumRisk"] = $this->riskS;
+						$this->dangerP = $this->dangerP + $this->dangerS;
+						$this->riskP = $this->riskP + $this->riskS;
+
+						$this->dangerS = 0;
+						$this->riskS = 0;
+					}
+					else if ($block[0]->getIdBlockType()->getBlockType() == 1) 
+					{
+						$blockA["NumDanger"] = $this->dangerP;
+						$blockA["NumRisk"] = $this->riskP;
+						$this->dangerP = 0;
+						$this->riskP = 0;
+					}
+
+					//$this->risk = $this->risk + $t['risk'];
+					//$this->danger = $this->danger + $t['danger'];
 				}
 
 				return $blockA;
@@ -314,11 +367,11 @@
 			{
 				$dql = "SELECT m.value as Val FROM AppBundle:Measurement m WHERE m.idSensor = ".$Sensor->getIdSensor()." ORDER BY m.idMeasurement DESC";
 				$query = $em->createQuery($dql);
-				$LastVals = $query->setMaxResults($long)->getResult();
+				$LastVals = $query->setMaxResults($this->long)->getResult();
 
 				$dql = "SELECT m.date as timing FROM AppBundle:Measurement m WHERE m.idSensor = ".$Sensor->getIdSensor()." ORDER BY m.idMeasurement DESC";
 				$query = $em->createQuery($dql);
-				$LastDates = $query->setMaxResults($long)->getResult();
+				$LastDates = $query->setMaxResults($this->long)->getResult();
 			}
 
 			if ($this->basic_stat) 

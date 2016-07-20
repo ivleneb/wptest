@@ -35,12 +35,37 @@
     		$danger = 0; $risk = 0;
 			
     		$em = $this->getDoctrine()->getManager();
-    		//$dql = "SELECT up FROM AppBundle:UsersBlocks up JOIN up.idBlock b JOIN b.idBlockType t WHERE (up.idUser = ".$user->getId()." AND t.blockType = 2)";
-    		$dql = "SELECT up FROM AppBundle:UsersBlocks up JOIN up.idBlock b JOIN b.idBlockType t WHERE (up.idUser= 1 AND t.blockType = 2)";
+    		/*$dql = "SELECT up FROM AppBundle:UsersBlocks up JOIN up.idBlock b JOIN b.idBlockType t WHERE (up.idUser = ".$user->getId()." AND t.blockType = 2)";
     		$query = $em->createQuery($dql);
     		$u_process = $query->getResult();
+			*/
 
-    		$MonitorBlock = [];
+			$dql = "SELECT up FROM AppBundle:UsersBlocks up JOIN up.idBlock b JOIN b.idBlockType t WHERE (up.idUser = ".$user->getId()." AND t.blockType = 1)";
+    		$query = $em->createQuery($dql);
+    		$u_plants = $query->getResult();
+
+
+    		$StaticInfo = [];
+
+    		$PlantBlock = array();
+
+    		$lD = $this->get('app.dataloader');
+
+    		$lD->retrieveProcessData();
+
+    		foreach ($u_plants as $plant) 
+    		{
+    			$PlantBlock[] = $lD->LoadAction($plant->getIdBlock()->getId(), $user->getId());
+    		}
+
+    		if (count($u_plants)==1) 
+    		{
+    			$StaticInfo = $PlantBlock[0];
+    		} else 
+    		{
+    			
+    		}
+    		
 
 			/*$encoders = array(new JsonEncoder());
 			$normalizers = array(new ObjectNormalizer());
@@ -48,7 +73,7 @@
 			$serializer = new Serializer($normalizers, $encoders);
 			*/
 			
-    		foreach ($u_process as $up) 
+    		/*foreach ($u_process as $up) 
     		{
     			$dql = "SELECT p FROM AppBundle:Blocks p WHERE p.id = ".$up->getIdBlock()->getId();
 				$query = $em->createQuery($dql);
@@ -83,14 +108,14 @@
 
 				array_push($MonitorBlock, array('id'=>$process[0]->getId(), 'Name'=>$process[0]->getBlockName(), 'CodeName'=>$process[0]->getBlockCodename(), 'NumStationBlocks'=>count($stations)));
     		}
-
+*/
     		//array_push($StaticInfo, array('HiUser'=>$welcome, 'NumDanger'=>$danger, 'NumRisk'=>$risk, 'MonitorBlock'=>$MonitorBlock));
 
-    		$StaticInfo = array('HiUser'=>$welcome, 'NumDanger'=>$danger, 'NumRisk'=>$risk, 'ProcessBlock'=>$MonitorBlock);
+    		//$StaticInfo = array('HiUser'=>$welcome, 'NumDanger'=>$danger, 'NumRisk'=>$risk, 'ProcessBlock'=>$MonitorBlock);
 
-    		/*$lD = $this->get('app.dataloader');
-    		$StaticInfo =
-*/
+    		
+    		//$StaticInfo = $lD->LoadAction();
+
     		return new Response(json_encode($StaticInfo));
     		//return new Response(json_encode($temp));
     		//$jsonContent = $serializer->serialize($temp, 'json');
@@ -115,6 +140,8 @@
 			$lD = $this->get('app.dataloader');
 
 			$lD->retrieveSensorData();
+			$lD->retrieveStationData();
+			$lD->retrieveProcessData();
 
 			$Process = $lD->LoadAction($idProcess, $user->getId());
 
@@ -139,8 +166,15 @@
         		throw $this->createAccessDeniedException();
     		}
     		$user = $this->getUser();
-			
+
 			$lD = $this->get('app.dataloader');
+
+
+    		$lD->retrieveSensorData();
+			$lD->retrieveStationData();
+			$lD->retrieveProcessData();
+			
+
 			$Process = $lD->UpdateAction($idProcess, 1, 0, 0, 1, 0, 0, 0, 0/*, $idUser*/);
 
     		return new Response(json_encode($Process));
@@ -160,7 +194,14 @@
     		$user = $this->getUser();
 			
 			$lD = $this->get('app.dataloader');
-			$Station = $lD->LoadAction($idStation, 1, 1, 0, 1, 1, 20, 0, 0 /*, $idUser*/);
+
+
+    		$lD->retrieveSensorData();
+			$lD->retrieveStationData();
+			$lD->retrieveProcessData();
+			
+
+			$Station = $lD->LoadAction($idStation, $user->getId());
 
     		return new Response(json_encode($Station));
 			
@@ -179,7 +220,14 @@
     		$user = $this->getUser();
 			
 			$lD = $this->get('app.dataloader');
-			$Station = $lD->UpdateAction($idStation, 1, 0, 0, 0, 0, 0, 0, 0/*, $idUser*/);
+
+
+    		$lD->retrieveSensorData();
+			$lD->retrieveStationData();
+			$lD->retrieveProcessData();
+			
+
+			$Station = $lD->UpdateAction($idStation, $user->getId());
 
     		return new Response(json_encode($Station));
 			
@@ -198,7 +246,14 @@
     		$user = $this->getUser();
 			
 			$lD = $this->get('app.dataloader');
-			$Station = $lD->SensorDataAction($idSensor, 1, 1, 0, 1, 1, 3, 1, 1);
+
+
+    		$lD->retrieveSensorData(1, 1, 1, $long);
+			$lD->retrieveStationData();
+			$lD->retrieveProcessData();
+			
+
+			$Station = $lD->SensorDataAction($idSensor, $idStation);
 
     		return new Response(json_encode($Station));
 			
@@ -217,7 +272,14 @@
     		$user = $this->getUser();
 			
 			$lD = $this->get('app.dataloader');
-			$Station = $lD->SensorDataAction($idSensor, 1, 0, 1, 0, 0, 1, 1, 1);
+
+
+    		$lD->retrieveSensorData(1, 1, 1, 1, 1, 0);
+			$lD->retrieveStationData();
+			$lD->retrieveProcessData();
+			
+
+			$Station = $lD->SensorDataAction($idSensor, $idStation);
 
     		return new Response(json_encode($Station));
 			
