@@ -12,11 +12,13 @@
 
 		private $entityManager;
 		private $mailer;
+		private $twig;
 
-		public function __construct(EntityManager $entityManager, Mailer $mailer)
+		public function __construct(EntityManager $entityManager, $mailer, /*\Twig_Environment*/ $twig)
 		{
 			$this->entityManager = $entityManager;
 			$this->mailer = $mailer;
+			$this->twig = $twig;
 		}
 
 
@@ -24,17 +26,17 @@
 		private $template;
 		private $message;
 
-		public function sendNewNotification($notifications, $byEmail = 1, $bySms = 0 )
+		public function sendNewNotifications($notifications=null, $byEmail = 1, $bySms = 0 )
 		{
 			//classify by user
 			$users_2_not = array();
 			$not_per_user = array(array());
 
-			//$this->orderNotifications($notifications, $users_2_not, $not_per_user);
+			$this->orderNotifications($notifications, $users_2_not, $not_per_user);
 
-			for ($i=0; $i < 5/*count($users_2_not)*/; $i++) 
+			for ($i=0; $i < count($users_2_not); $i++) 
 			{ 
-				$this->sendEmail(/*$users_2_not[$i]->getEmail(), $not_per_user[$i], 'ALERRTTTT ITS GONNA EXPLODEEEEEEEE RUUUN FORREST RUN!!!!!!'*/);
+				$this->sendEmail($users_2_not[$i]->getEmail(), $not_per_user[$i], 'ALERRTTTT ITS GONNA EXPLODEEEEEEEE RUUUN FORREST RUN!!!!!!');
 			}
 
 		}
@@ -49,7 +51,7 @@
 				$j=0;
 				$saved = 0;
 				$times = count($users_2_not); 
-				$user_not = $notifications[$i]->getIdUser()
+				$user_not = $notifications[$i]->getIdUser();
 				
 				while ($j<$times) 
 				{
@@ -128,22 +130,22 @@
 			return;
 		}*/
 
-		private function sendEmail($u_email = 'beenelvi.godoy@gmail.com', $info=null, $subject="no-Subject", $format='alert')
+		private function sendEmail($u_email = 'beenelvi.godoy@gmail.com', $info=null, $subject="no-Subject", $format='1')
 		{
 			$message = \Swift_Message::newInstance()
 		        ->setSubject($subject)
 		        ->setFrom('juan.basilio@waposat.com')
 		        ->setTo($u_email)
 		        ->setBody(
-		            $this->renderView(
-		                'AppBundle:Emails:'.$format.'.html.twig',
+		            $this->twig->render(
+		                'Email/'.$format.'.html.twig',
 		                array('info' => $info)
 		            ),
 		            'text/html'
 		        )
 		    ;
 		    
-		    $this->get('mailer')->send($message);
+		    $this->mailer->send($message);
 		    //return new Response('<html><body>Email to '.$u_email.' sent!</body></html>', Response::HTTP_OK);
 		}
 	}

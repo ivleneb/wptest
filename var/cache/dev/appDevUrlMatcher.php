@@ -100,9 +100,25 @@ class appDevUrlMatcher extends Symfony\Bundle\FrameworkBundle\Routing\Redirectab
 
         }
 
-        // mailing
-        if (0 === strpos($pathinfo, '/mailing') && preg_match('#^/mailing/(?P<codeSchedule>[^/]++)/(?P<schedule>[^/]++)$#s', $pathinfo, $matches)) {
-            return $this->mergeDefaults(array_replace($matches, array('_route' => 'mailing')), array (  '_controller' => 'AppBundle\\Controller\\MailingController::ScheduledEmailAction',));
+        if (0 === strpos($pathinfo, '/m')) {
+            // mailing
+            if (0 === strpos($pathinfo, '/mailing') && preg_match('#^/mailing/(?P<codeSchedule>[^/]++)/(?P<schedule>[^/]++)$#s', $pathinfo, $matches)) {
+                return $this->mergeDefaults(array_replace($matches, array('_route' => 'mailing')), array (  '_controller' => 'AppBundle\\Controller\\MailingController::ScheduledEmailAction',));
+            }
+
+            if (0 === strpos($pathinfo, '/monitor')) {
+                // persistData
+                if (preg_match('#^/monitor(?:/(?P<encoded_stream>[^/]++))?$#s', $pathinfo, $matches)) {
+                    return $this->mergeDefaults(array_replace($matches, array('_route' => 'persistData')), array (  'encoded_stream' => NULL,  '_controller' => 'AppBundle\\Controller\\MonitorController::PersistDataAction',));
+                }
+
+                // generateCredentials
+                if (0 === strpos($pathinfo, '/monitor/validate') && preg_match('#^/monitor/validate/(?P<encoded_credentials>[^/]++)$#s', $pathinfo, $matches)) {
+                    return $this->mergeDefaults(array_replace($matches, array('_route' => 'generateCredentials')), array (  '_controller' => 'AppBundle\\Controller\\MonitorController::ValidateCredentialsAction',));
+                }
+
+            }
+
         }
 
         if (0 === strpos($pathinfo, '/v2/dashboard')) {

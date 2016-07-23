@@ -379,9 +379,15 @@
     <service id="app.dataloader" class="AppBundle\Service\DataLoader">
       <argument key="entityManager" type="service" id="doctrine.orm.default_entity_manager"/>
     </service>
-    <service id="app.mailer" class="AppBundle\Service\Mailer">
+    <service id="app.mailer" class="AppBundle\Service\MailerManager">
+      <argument key="entityManager" type="service" id="doctrine.orm.default_entity_manager"/>
+      <argument key="mailer" type="service" id="swiftmailer.mailer.default"/>
+      <argument key="twig" type="service" id="twig"/>
+    </service>
+    <service id="app.event_manager" class="AppBundle\Service\EventsManager">
       <argument key="entityManager" type="service" id="doctrine.orm.default_entity_manager"/>
     </service>
+    <service id="app.encoder" class="AppBundle\Service\Encoder"/>
     <service id="controller_name_converter" class="Symfony\Bundle\FrameworkBundle\Controller\ControllerNameParser" public="false">
       <tag name="monolog.logger" channel="request"/>
       <argument type="service" id="kernel"/>
@@ -1511,7 +1517,7 @@
         </argument>
         <argument type="service">
           <service class="Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider" public="false">
-            <argument>578fdbf1664886.81192496</argument>
+            <argument>57927c2c18eae6.84047752</argument>
           </service>
         </argument>
       </argument>
@@ -1815,7 +1821,7 @@
         <argument type="service">
           <service class="Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener" public="false">
             <argument type="service" id="security.token_storage"/>
-            <argument>578fdbf1664886.81192496</argument>
+            <argument>57927c2c18eae6.84047752</argument>
             <argument type="service" id="monolog.logger.security" on-invalid="null"/>
             <argument type="service" id="security.authentication.manager"/>
           </service>
