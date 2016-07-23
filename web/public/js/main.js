@@ -1,32 +1,19 @@
-var cadena=null;
+
 var Risk="";
 var Danger="";
 var Icono=""; 
 var estilo=""; 
-var pathJSON="ScriptFrontEnd/Screen2/"; 
+
+var pathIMG="public/img/"; 
 var nodo=null;
 var pushLeft=null; 
 var pushRight=null; 
-var session=null; 
-//leerdatos();
+
 
   
 $(document).ready(function(){
     
-    
-    session=0;
-    
-    LoadNav(1);
-    /*if(session==1)
-    {
-        LoadNav(1);
-    }
-    else
-    {
-        LoadLogin();
-    }*/
-    
-
+LoadNav(vista);
     
 $("footer").html('Copyright &copy; Waposat 2016');
 
@@ -34,15 +21,64 @@ $("footer").html('Copyright &copy; Waposat 2016');
 
 
 
-function leerdatos(){
-$.getJSON('ScriptFrontEnd/Screen1/MonitorBlock.php',$('#formulario').serialize(), function(data) {
-  cadena='';
-  $("#puntos").html(data.MonitorPoint.length);
-  $.each(data.MonitorPoint, function(key, val) {
+
+
+function BlockDetail(idstation=1)
+{
+    
+ $.getJSON('dashboard/station/'+idstation, function(data) {
+ var items = [];
+ 
+ items.push('<div class="DetailHead" onclick=pushRight.close()><i class="fa fa-arrow-right" aria-hidden="true"></i> Parametros Totales</div>\n\
+            <div class=Detail><span>'+data.Name+'<br>'+data.CodeName+'</span>\n\
+            <div style="padding-left:20px;"><table class="tablainformativa">');
+ items.push('<tr><th>Parámetro</th><th>Min</th><th>Max</th><th>Actual</th></tr>');
+   var stylo='';
+   
+   $.each(data.Sensor, function(key, val) {
+   stylo=' class="Stable"';
+    if(val.LastValue>=val.LMR && val.LastValue<=val.LMP)
+   {
+   stylo=' class="Risk"';
+   }else if(val.LastValue>val.LMP)
+   {
+    stylo=' class="Danger"';
+   }  
+   
+    items.push('<tr><td>' + val.Name +'</td><td>' + val.MinValue +'</td><td>' + val.MaxValue +'</td><td '+ stylo +'><span '+stylo+'>' + val.Last.Value +'</span></td></tr>');
+});
+
+
+ items.push('</table></div> <a href=javascript:pushRight.close() class=ButtonBack>Volver</a></div>');
+
+ $(nodo1).html(items.join(''));
+
+});
+ 
+}
+
+function ShowBlock(id,risk=1,danger=1,stable=1)
+{
+    
+$("section").html('<div class=Block><div class=filtros>\n\
+<form id="formulario" name=formulario>\n\
+Puntos de Monitorea (<span id="puntos">0</span>) \n\
+<label><input type="checkbox" name="critico" '+(risk==1?'checked':'')+' onclick="ShowBlock('+id+',document.formulario.critico.checked,document.formulario.alerta.checked,document.formulario.estable.checked)" value=1> Critico</label>\n\
+<label><input type="checkbox" name="alerta" '+(danger==1?'checked':'')+' onclick="ShowBlock('+id+',document.formulario.critico.checked,document.formulario.alerta.checked,document.formulario.estable.checked)"  value=1> Alerta</label>\n\
+<label><input type="checkbox" name="estable" '+(stable==1?'checked':'')+' onclick="ShowBlock('+id+',document.formulario.critico.checked,document.formulario.alerta.checked,document.formulario.estable.checked)"  value=1> Estable</label></form>\n\
+</div>\n\
+<div id=main class="boxcols"></div></div><div class=DetailBlock></div>');
+$.getJSON('dashboard/process/'+id, function(data) {
+ 
+ var cadena="";
+  $("#puntos").html(data.StationBlock.length);
+  $.each(data.StationBlock, function(key, val) {
+      
   Risk='';
   Danger='';
   Icono=''; 
   estilo=''; 
+  
       if(val.NumRisk>0)
       {Risk='<div  class=InfoRisk>' + val.NumRisk +'</div>';}
       if(val.NumDanger>0)
@@ -58,64 +94,31 @@ $.getJSON('ScriptFrontEnd/Screen1/MonitorBlock.php',$('#formulario').serialize()
       {Icono='<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
       estilo='PanelHeadDanger';}
      
-   cadena+='<div class="box"><div class="Panel"><div class='+estilo+'><table class=TablaPanel><tr><td class=PanelAlerta>'+Icono+'</td><td class=PanelTitulo onclick="ShowPoint('+ val.Id +')">'+ val.Name +'<br>' + val.CodeName +'</td><td align=right width="30%">'+ Danger + Risk +'</td></tr></table></div><div class=PanelBody>';
+   cadena+='<div class="box"><div class="Panel"><div class='+estilo+'><table class=TablaPanel><tr><td class=PanelAlerta>'+Icono+'</td><td class=PanelTitulo onclick="ShowPoint('+ val.id +')">'+ val.Name +'<br>' + val.CodeName +'</td><td align=right width="30%">'+ Danger + Risk +'</td></tr></table></div><div class=PanelBody>';
    
-      $.each(data.MonitorPoint[key].Parameter, function(k, v) {
-    cadena+='<div class=PanelDetalle><span>' + v.Code +': </span><span> ' + v.LastValue +'</span></div>';
+      $.each(data.StationBlock[key].Sensor, function(k, v) {
+    cadena+='<div class=PanelDetalle><span>' + v.CodeName +': </span><span> ' + v.Last.Value +'</span></div>';
    });
    
    cadena+='</div></div></div>';
+   $("#main").html(cadena); 
+   calBoxCol();
+pushLeft.close();
   });
 
 });
 
-return cadena;
-}
-
-function BlockDetail(id)
-{
-    
- $.getJSON('ScriptFrontEnd/Screen1/MonitorPoint.php',{'id':id}, function(data) {
- var items = [];
  
- items.push('<div class="DetailHead" onclick=pushRight.close()><i class="fa fa-arrow-right" aria-hidden="true"></i> Parametros Totales</div>\n\
-            <div class=Detail><span>'+data.Name+'<br>'+data.CodeName+'</span>\n\
-            <table class="tablainformativa" align="center">');
- items.push('<tr><th>Parámetro</th><th>Min</th><th>Max</th><th>Actual</th></tr>');
-   var stylo='';
-   
-   $.each(data.Parameter, function(key, val) {
-   stylo=' class="Stable"';
-    if(val.LastValue>=val.LMR && val.LastValue<=val.LMP)
-   {
-   stylo=' class="Risk"';
-   }else if(val.LastValue>val.LMP)
-   {
-    stylo=' class="Danger"';
-   }  
-   
-    items.push('<tr><td>' + val.Name +'</td><td>' + val.MinValue +'</td><td>' + val.MaxValue +'</td><td '+ stylo +'><span '+stylo+'>' + val.LastValue +'</span></td></tr>');
-});
 
 
- items.push('</table> <a href=javascript:pushRight.close() class=ButtonBack>Volver</a></div>');
 
- $(nodo1).html(items.join(''));
-
-});
- 
 }
 
-function ShowBlock()
-{
-$("section").html('<div class=Block><div class=filtros><form id="formulario">Puntos de Monitorea (<span id="puntos"></span>) <label><input type="checkbox" name="critico" checked=checked onclick="leerdatos()" value=1> Critico</label> <label><input type="checkbox" name="alerta" onclick="leerdatos()"  checked=checked value=1> Alerta</label><label><input type="checkbox" name="estable" value=1 checked=checked onclick="leerdatos()"> Estable</label></form></div><div id=main class="boxcols"></div></div><div class=DetailBlock></div>');
-$("#main").html(leerdatos());  
-calBoxCol();
-}
-function ShowPoint()
+
+function ShowPoint(id)
 {
 
-$.getJSON('ScriptFrontEnd/Screen1/MonitorPoint.php',function(data){
+$.getJSON('dashboard/station/'+id,function(data){
   
       if(data.NumDanger==0 && data.NumRisk==0 )
       {Icono=''; 
@@ -127,14 +130,28 @@ $.getJSON('ScriptFrontEnd/Screen1/MonitorPoint.php',function(data){
       {Icono='<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
       estilo='PanelHeadDanger';}
   
-$(".DetailBlock").html("<table class=TablaPoint border=0><tr><td><div class="+estilo+"><div Class=PanelAlerta>"+ Icono +"</div> "+data.Name+"<br>"+data.CodeName+"<div class='MenuRight' onclick='BlockDetail(1);pushRight.open()'><i class='fa fa-bars' aria-hidden='true'></i></div></div></td></tr><tr><td> <div id=ChartGauge class=Group></div></div></td></tr><tr><td align=center><table><tr><td><div id=ChartTittle></div></td></tr><tr><td><div id=ChartLines></div></td></tr><tr><td><div id=ChartDetail  class='DetailChart Black'></div> <td></tr></table></td></tr></table>");
+$(".DetailBlock").html("<table class=TablaPoint>\n\
+<tr><td><div class='"+estilo+"' ><table cellpadding=10 width=100%><tr><td style='color:#FFFFFF'><div Class=PanelAlerta>"+ Icono +"</div> "+data.Name+"<br>"+data.CodeName+"</td><td align=right><div class='MenuRight' onclick='BlockDetail("+data.id +");pushRight.open()'><i class='fa fa-bars' aria-hidden='true'></i></div></td></tr></table></div></td></tr>\n\
+<tr><td> <div id=ChartGauge class=Group></div></div></td></tr>\n\
+<tr><td align=center>\n\
+<table>\n\
+<tr><td colspan=2><div id=ChartTittle style='text-align:center'></div></td></tr>\n\
+<tr><td colspan=2><div id=ChartLines></div></td></tr>\n\
+<tr><td><div id=ChartDetail  class='DetailChart Black'></div> </td> <td valign=top><div id=filtro></div> </td></tr></table></td></tr></table>");
 var n;   
-    
-    $.each(data.Parameter,function(k,v){
+    var num=0;
+    $.each(data.Sensor,function(k,v){
+        if(num==0)
+        {
+            showparameter(id,v.id,20);  
+        }
+      
+      num+=1;
+      
      $("#ChartGauge").append('<div class=ItemBox><div id=chart'+k+' class=grafico></div></div>');  
-     n=((v.LastValue*100)/v.MP);
-     drawChart('chart'+k,v.Code,Math.round(n * 100) / 100,v.LMP*100/v.MP,100,v.LMR*100/v.MP,v.LMP*100/v.MP);
-     $('#chart'+k).append("<label>"+v.Name+"</label>");
+     n=((v.Last.Value*100)/v.MP);
+     drawChart('chart'+k,v.CodeName,Math.round(n * 100) / 100,v.LMP*100/v.MP,100,v.LMR*100/v.MP,v.LMP*100/v.MP);
+     $('#chart'+k).append("<label style='cursor:pointer' onclick=showparameter("+id +","+v.id +",20)>"+v.Name+"</label>");
     });
     
 $(".DetailBlock").css("width","50%");
@@ -146,12 +163,22 @@ ResizeCol();
 
 
 
-$.getJSON('ScriptFrontEnd/Screen1/ParameterData.php',function(data){
+
+
+
+}
+
+
+function showparameter(idstation=1,idsensor=1,long=20)
+{
+    
+$.getJSON('dashboard/station/'+idstation+'/sensor/'+idsensor+'/long/'+long,function(data){
     
 var datos="[";  
 
-$("#ChartTittle").html(data.Name+"<br>mg/L vs Tiempo");
-$("#ChartDetail").html('<table><tr><td>Minimo:</td><td><label>'+data['MinValue']+ '</label></td></tr><tr><td>Medio:</td><td><label>'+data['MeanValue'] +'</label></td></tr><tr><td>Maximo:</td><td><label>'+data['MaxValue'] +'</label></td></tr></table>');
+$("#ChartTittle").html("<h6>"+data.Name+"</h6><span class=subtitulo>mg/L vs Tiempo</span>");
+$("#ChartDetail").html('<table><tr><td>Minimo:</td><td><label>'+data['MinValue'].toFixed(2)+ '</label></td></tr><tr><td>Medio:</td><td><label>'+data['MeanValue'].toFixed(2) +'</label></td></tr><tr><td>Maximo:</td><td><label>'+data['MaxValue'].toFixed(2) +'</label></td></tr></table><div></div>');
+$("#filtro").html('<select onchange=showparameter('+idstation+','+idsensor+',this.value) id=ListPoint><option value=10 '+ (long==10?'selected':'') + '> 10 Puntos</option><option value=20 '+ (long==20?'selected':'') +'> 20 Puntos</option></select><div id=limites><label>Limite: '+data.LMR+' - '+data.LMP+'</label> <i class="fa fa-cog" aria-hidden="true"></i></div>');
 
 for(a=0;a<=data.Data.Time.length-1;a++)
     {
@@ -162,104 +189,102 @@ datos=datos.substr(0,datos.length-1)+"]";
 
 drawCurveTypes('ChartLines',330,200,datos,data.Name);
     
-});
-
-
+});    
+    
 }
+
 
 function LoadNav(type = 1)
 {
+    var ruta=null;
+    var funcion=null;
+if (type==1) {ruta="/dashboard";
+    funcion="ShowBlock";}
+if (type==2) {ruta="v2/dashboard";
+    funcion="ShowPlain";}
 
- $.post("/dashboard",$("#formulario").serialize(), function(response) {
-     
-   var data= jQuery.parseJSON(response);
+ $.post(ruta, function(response) {
+
+ var data=jQuery.parseJSON(response);
    
-   if(data.HiUser=="")
-   {
-       $("#respuesta").html("El usuario o la contraseña son incorrectos");
-       return;
-   } 
-  
+ 
 
  nodo=document.getElementsByTagName("aside")[0];
  pushLeft = new Menu({type: 'push-left', menuOpenerClass: '.menuleft',Menu:nodo});
  
  nodo1=document.getElementsByTagName("aside")[1];
  pushRight = new Menu({type: 'push-right', menuOpenerClass: '.menuright',Menu:nodo1});
- 
+
+     
     var items = [];
    $("section").css("background-color","#ffffff"); 
    $("header").html('<a class="icon" onclick="pushLeft.open()"><i class="fa fa-bars" aria-hidden="true"></i></a>\n\
                      <div class=logo><img src="public/img/waposat-logo-flat.png" class=LogoToolBar></div>\n\
-                     <div class=user>'+data.HiUser+'</div>\n\
+                     <div class=user><label class=labelExport>'+data.HiUser+'</label></div>\n\
                      <a class="icon-close" id=Close><i class="fa fa-power-off" aria-hidden="true"></i></a>\n\
-                     <div class="BoxAlert"><i class="fa fa-bell" aria-hidden="true" style="float:left"></i> <span class="InfoDanger InfoLittle ">'+data.NumDanger+'</span><span class="InfoRisk InfoLittle ">'+ data.NumRisk+'</span></div>\n\
-                     <div class="Export" onclick="Export()"><i class="fa fa-share-square-o" aria-hidden="true"></i> Exportar</div>\n\
+                     <div class="BoxAlert"><i class="fa fa-bell" aria-hidden="true" style="float:left"></i> <label class=labelExport><span class="InfoDanger InfoLittle ">'+data.NumDanger+'</span><span class="InfoRisk InfoLittle ">'+ data.NumRisk+'</span></label></div>\n\
+                     <div class="Export" onclick="Export()"><i class="fa fa-share-square-o" aria-hidden="true"></i> <label class=labelExport>Exportar</label></div>\n\
                      ');
-if(type==1)
-{     
-   items.push('<div id="bloques" onclick=pushLeft.close()>BLOQUES <i class="fa fa-arrow-right" aria-hidden="true"></i></div>');
      
+
+    
+  items.push('<div id="bloques" onclick=pushLeft.close()>BLOQUES <i class="fa fa-arrow-right" aria-hidden="true"></i></div>');
+    var num=0;
   $.each(data.ProcessBlock, function(key, val) {
-    items.push('<a id=\'link' + val.Id +'\' >' + val.Name +'<br />' + val.CodeName +'</a>');
+      if(num==0)
+      {
+          if(type==1) {
+              ShowBlock(val.id)
+          }
+          if(type==2)
+          {
+              ShowPlain(val.id)
+          }
+      }
+      
+      num+=1;
+      
+    items.push('<a onclick='+funcion+'('+val.id+')>' + val.Name +'<br />' + val.CodeName +'</a>');
    });
    
  $('<nav/>', {'class': 'menu', html: items.join('')}).appendTo(nodo);
+
+ShowAlert(type);
     
-    
-  
 
 
-$('#link1').click(function(){
-pushLeft.close();
- ShowPoint();
-});
-
-$('#Close').click(function(){
+ $('#Close').click(function(){
 CloseSession();
 });
-
-$("#link2").click(function(){
-pushLeft.close();
- ShowBlock();
-});
-
-ShowAlert();
-ShowBlock();
-}
-else if(type==2)
-{
-ShowPlain(); 
-ShowAlert();
-}
-
  
 });
 
 
 
- //launchFullscreen(); 
  
 }
 
 function CloseSession()
 {
-if (confirm("Close Window?")) {
-  $.get("php/close.php",function(data){});
-      location.reload();
+    
+if (confirm("Cerrar Sesi\u00F3n")) {
 
-    }    
+window.location.assign("http://monitoreo.waposat.com/logout");
+   }    
     
 }
 
 
-function ShowAlert()
+function ShowAlert(type=1)
 {
+    var ruta=null;
+    if (type==1) {ruta="dashboard/alerts/";}
+    if (type==2) {ruta="v2/dashboard/alerts/";}
     
-$.getJSON(pathJSON+"AlertData",function(data){
+$.getJSON(ruta,function(data){
 var items=[];
 items.push('<div class=BoxMessage><ul class="Message">');
-    $.each(data,function(k,v){
+    $.each(data.Alert,function(k,v){
          extra='';
       if(v.AlertType==0)
       {extra=' InfoRisk ';
@@ -267,8 +292,14 @@ items.push('<div class=BoxMessage><ul class="Message">');
       else
       {extra=' InfoDanger ';
       estilomensaje=' class=MessageDanger ';}
+      if (type==1)
+      {items.push('<li onclick="ShowBlock('+ v.idProcessBlock +')" '+estilomensaje+'><div class="'+extra+' InfoLittlePoint InfoList"> </div> ' +v.Message+'</li>');}
       
-      items.push('<li onclick="ShowDetail('+ v.IdMonitorBlock +')" '+estilomensaje+'><div class="'+extra+' InfoLittlePoint InfoList"> </div> ' +v.Message+'</li>');
+       if (type==2)
+      {items.push('<li onclick="ShowPlain('+ v.idProcessBlock +')" '+estilomensaje+'><div class="'+extra+' InfoLittlePoint InfoList"> </div> ' +v.Message+'</li>');}
+      
+      
+      
     });
 items.push('</ul></div>');
 
@@ -347,7 +378,7 @@ function Export()
     }
     
 
-function ShowPlain()
+function ShowPlain(id=1)
     {
       var items = [];
  
@@ -355,23 +386,27 @@ function ShowPlain()
      var extra="";
      items.push('<div id="owl-demo" class="owl-carousel owl-theme">');
      
-        $.getJSON("ScriptFrontEnd/Screen2/MonitorBlock.php",function(data){
-            $.each(data.MonitorPoint,function(key,value){
+        $.getJSON("v2/dashboard/process/"+id,function(data){
+            $.each(data.StationBlock,function(key,value){
 
-  puntos="<div style='height:120px'><table align=center>";
-  $.each(value.Parameter,function(k,v){
+  puntos="<div style='height:120px'><table align=center border=0>";
+  $.each(value.Sensor,function(k,v){
       extra=' InfoStable';
       if(v.LastValue>=v.LMR && v.LastValue < v.LMP)
       {extra=' InfoRisk ';}
       if(v.LastValue>=v.LMP)
       {extra=' InfoDanger ';}
       
-     puntos+='<tr onclick=ShowDetail('+v.Id+')><td><div class="' + extra + ' InfoLittlePoint"> </div></td><td align=left>'+ v.Code+'</td><td align=left>: '+v.LastValue+'</td></tr>'; 
+     puntos+='<tr onclick=ShowDetail('+value.id+','+v.id+')><td><div class="' + extra + ' InfoLittlePoint"> </div></td><td align=left>'+ v.CodeName+'</td><td align=left>: '+v.Last.Value+'</td></tr>'; 
   });
+  
+  
   puntos+="</table></div>"
   
-             items.push('<div class="item"><div class=PlainBox>'+ value.CodeName +'</div><br>'+ puntos+'<br>'+ value.Name +'<br><div style="background-image:url('+pathJSON+value.URL +'); background-position:top center;height:250px"></img src="ScriptFrontEnd/Screen2/'+value.URL +'"></div></div>');
+             items.push('<div class="item"><div class=PlainBox>'+ value.CodeName +'</div><br>'+ puntos+'<br>'+ value.Name +'<br><div style="background-image:url('+pathIMG+value.URL +'.png); background-position:top center;height:250px"></img src="ScriptFrontEnd/Screen2/'+value.URL +'"></div></div>');
  });
+           
+           
            
      items.push('</div><a class="btn prev"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>  <a class="btn next"><i class="fa fa-arrow-right" aria-hidden="true"></i></a>');
            
@@ -389,10 +424,10 @@ function ShowPlain()
             
             
         });
-        
+       pushLeft.close(); 
     }
     
-  function ShowDetail(id)
+  function ShowDetail(idstation,idsensor,long=20)
   {
   var n;
    $('.BoxAlert').tooltipster('close');
@@ -402,15 +437,17 @@ function ShowPlain()
    $(".DetailParameter").append('<div class="DetailHead"><i class="fa fa-arrow-right" aria-hidden="true"></i> Detalles del Parametro</div>');
    
    $.ajax({
-       url:pathJSON+'ParameterData.php',
+       url:'v2/dashboard/station/'+idstation+'/sensor/'+idsensor+'/long/'+long,
        type:'GET',
        dataType: 'json',
        success:function(data){
            $(".DetailParameter").append('<div class="DetailAlert"><div class=PanelAlerta><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></div>'+data['Name']+ '</div>');
-           $(".DetailParameter").append('<table align=center border=0 ><tr><td align=center><div id=Chart></div></td><td rowspan=2  align=center><div class="DetailValue"><table><tr><td>Minimo:</td><td><label>'+data['MinValue']+ '</label></td></tr><tr><td>Medio:</td><td><label>'+data['MeanValue'] +'</label></td></tr><tr><td>Maximo:</td><td><label>'+data['MaxValue'] +'</label></td></tr></table></div></td></tr><tr><td><div class="DetailChart"></div></td></tr><tr><td colspan=2 align=center> <label class=DetailLabel>Limites máximos establecidos por la OMS</label></td></tr><tr><td colspan=2><div id=ChartLines>000</div></td></tr><tr><td><select name=long><option value="20">20 puntos</option><option value="10">10 puntos</option></select> <label> 5 - 7.5</label> <i class="fa fa-cog" aria-hidden="true"></i></td></tr></table>');
+           $(".DetailParameter").append('<table align=center border=0 ><tr><td align=center><div id=Chart></div></td><td rowspan=2  align=center><div class="DetailValue"><table><tr><td>Minimo:</td><td><label>'+data['MinValue'].toFixed(2)+ '</label></td></tr><tr><td>Medio:</td><td><label>'+data['MeanValue'].toFixed(2) +'</label></td></tr><tr><td>Maximo:</td><td><label>'+data['MaxValue'].toFixed(2) +'</label></td></tr></table></div></td></tr><tr><td><div class="DetailChart"></div></td></tr><tr><td colspan=2 align=center> <label class=DetailLabel>Limites máximos establecidos por la OMS</label></td></tr><tr><td colspan=2><div id=ChartLines>000</div></td></tr><tr><td><select name=long onchange=ShowDetail('+idstation+','+idsensor+',this.value)><option value="20" '+(long==20?'selected':'')+'>20 puntos</option><option value="10" '+(long==10?'selected':'')+'>10 puntos</option></select> <div id=limites><label>Limite: '+data['LMR']+' - '+data['LMP']+'</label> <i class="fa fa-cog" aria-hidden="true"></i></div></td></tr></table>');
            
             n=((data['Last']['Value']*100)/data['MP']);
-            drawChart('Chart',data['Code'],Math.round(n * 100) / 100,data['LMP']*100/data['MP'],100,data['LMR']*100/data['MP'],data['LMP']*100/data['MP']);
+       
+            drawChart('Chart',data['CodeName'],Math.round(n * 100) / 100,data['LMP']*100/data['MP'],100,data['LMR']*100/data['MP'],data['LMP']*100/data['MP']);
+            
             $(".DetailChart").html('Medida Actual:<br><label>'+data['Last']['Value']+'</label>');
             
            
@@ -422,14 +459,10 @@ var d = new Date("1 1, 2016 "+data.Data.Time[a]);
 datos+="[["+ d.getHours() +","+ d.getMinutes() +",0],"+ data.Data.Value[a]+","+data.LMP+","+data.LMR+"],";
     }
 datos=datos.substr(0,datos.length-1)+"]";  
-           
+         
 drawCurveTypes("ChartLines",275,180,datos,data['Name']);
-
 pushRight.open();
            
-       },
-       complete:function(data){
-        
        },
        error:function(){}
        
@@ -553,19 +586,4 @@ document.addEventListener("msfullscreenchange", function(e) {
   console.log("msfullscreenchange event! ", e);
 });
 
-function Login()
-{
-if($("#user").val()=="")
-{
-  $("#respuesta").html("Ingrese un usuario.");
-   return;
-}   
 
-if($("#password").val()=="")
-{
-  $("#respuesta").html("Ingrese un password.");
-   return;
-}  
-LoadNav(2);    
-    
-}
