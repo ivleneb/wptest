@@ -52,7 +52,7 @@
 				}
 
 				$ml = $this->get('app.mailer');
-				$ml->sendNewNotifications($notifications);
+				//$ml->sendNewNotifications($notifications);
 
 				//return new Response(json_encode($notifications));
 				return new Response("<!DOCTYPE html>
