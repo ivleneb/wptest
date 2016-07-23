@@ -25,7 +25,6 @@
 			//return $this->render('wapo/index.html.twig');
 
 
-
 			$request = Request::createFromGlobals();
 			$path = $request->getPathInfo();
 			$var = 1;
@@ -37,10 +36,6 @@
 				$var = 2;
 			}
 			
-			//$var = $request->request->get('_target', 'default value if bar does not exist');
-
-			//$var = $_POST['_url'];
-
 			return $this->render('index.html.twig', array("seleccion"=>$var, "path"=>$path));
 		}
 
@@ -72,6 +67,4 @@
 		}
 
 	}
-
-
  ?>

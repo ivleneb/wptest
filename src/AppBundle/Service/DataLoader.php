@@ -426,9 +426,12 @@
 				$dql = "SELECT m FROM AppBundle:Measurement m WHERE m.idSensor = ".$sensor->getIdSensor()." ORDER BY m.idMeasurement DESC";
 				$measurement = $em->createQuery($dql)->setMaxResults(1)->getResult();
 
-				$key = abs(($measurement[0]->getValue() - $s->getUpDangerLimit())/($s->getUpDangerLimit()));
+				if(count($measurement)==1)
+				{
+					$key = strval(abs(($measurement[0]->getValue() - $s->getUpDangerLimit())/($s->getUpDangerLimit())));
 
-				$relevance[$key] = $sensor;
+					$relevance[$key] = $sensor;
+				}
 
 			}
 

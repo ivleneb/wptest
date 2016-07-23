@@ -36,6 +36,13 @@ class Senders
     /**
      * @var string
      *
+     * @ORM\Column(name="ptmp", type="string", length=30, nullable=false)
+     */
+    private $ptmp;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="description", type="text", length=65535, nullable=false)
      */
     private $description;
@@ -138,6 +145,30 @@ class Senders
     }
 
     /**
+     * Set ptmp
+     *
+     * @param string $ptmp
+     *
+     * @return Senders
+     */
+    public function setPtmp($ptmp)
+    {
+        $this->ptmp = $ptmp;
+
+        return $this;
+    }
+
+    /**
+     * Get ptmp
+     *
+     * @return string
+     */
+    public function getPtmp()
+    {
+        return $this->ptmp;
+    }
+
+    /**
      * Set description
      *
      * @param string $description
@@ -218,4 +249,5 @@ class Senders
     {
         return $this->idSender;
     }
+
 }

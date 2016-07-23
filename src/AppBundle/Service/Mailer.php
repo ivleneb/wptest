@@ -7,20 +7,70 @@
 	/**
 	* Allows to you to generate and send any email that you need in the application
 	*/
-	class Mailer
+	class MailerManager
 	{
 
 		private $entityManager;
+		private $mailer;
 
-		public function __construct(EntityManager $entityManager)
+		public function __construct(EntityManager $entityManager, Mailer $mailer)
 		{
 			$this->entityManager = $entityManager;
+			$this->mailer = $mailer;
 		}
 
 
 		private $scheduled;
 		private $template;
 		private $message;
+
+		public function sendNewNotification($notifications, $byEmail = 1, $bySms = 0 )
+		{
+			//classify by user
+			$users_2_not = array();
+			$not_per_user = array(array());
+
+			//$this->orderNotifications($notifications, $users_2_not, $not_per_user);
+
+			for ($i=0; $i < 5/*count($users_2_not)*/; $i++) 
+			{ 
+				$this->sendEmail(/*$users_2_not[$i]->getEmail(), $not_per_user[$i], 'ALERRTTTT ITS GONNA EXPLODEEEEEEEE RUUUN FORREST RUN!!!!!!'*/);
+			}
+
+		}
+
+		private function orderNotifications($notifications, &$users_2_not, &$not_per_user)
+		{
+			
+			$users_2_not[0] = $notifications[0]->getIdUser();
+			
+			for ($i=0; $i < count($notifications); $i++) 
+			{ 	
+				$j=0;
+				$saved = 0;
+				$times = count($users_2_not); 
+				$user_not = $notifications[$i]->getIdUser()
+				
+				while ($j<$times) 
+				{
+					if($users_2_not[$j] == $user_not)
+					{
+						$not_per_user[$j][] = $notifications[$i];
+						$saved = 1;
+						break;
+					}
+					$j++;
+				}
+
+				if ($saved == 0) 
+				{
+					$users_2_not[$j] = $user_not;
+					$not_per_user[$j][] = $notifications[$i];
+				}
+
+			}
+
+		}
 
 		/***algoritmo de busqueda
 
@@ -78,10 +128,10 @@
 			return;
 		}*/
 
-		/*public function send ($u_email='juan.basilio@waposat.com', $info=null, $format='alert')
+		private function sendEmail($u_email = 'beenelvi.godoy@gmail.com', $info=null, $subject="no-Subject", $format='alert')
 		{
 			$message = \Swift_Message::newInstance()
-		        ->setSubject('Hello Email')
+		        ->setSubject($subject)
 		        ->setFrom('juan.basilio@waposat.com')
 		        ->setTo($u_email)
 		        ->setBody(
@@ -92,9 +142,10 @@
 		            'text/html'
 		        )
 		    ;
+		    
 		    $this->get('mailer')->send($message);
-		    return new Response('<html><body>Email to '.$u_email.' sent!</body></html>', Response::HTTP_OK);
-		}*/
+		    //return new Response('<html><body>Email to '.$u_email.' sent!</body></html>', Response::HTTP_OK);
+		}
 	}
 
 ?>

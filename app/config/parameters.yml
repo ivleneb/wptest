@@ -4,7 +4,7 @@ parameters:
     database_port: null
     database_name: DB2WAPOSAT
     database_user: root
-    database_password: Waposat1_UNI #i
+    database_password: initec123 #Waposat1_UNI
     mailer_transport: smtp
     mailer_host: smtp.zoho.com
     mailer_user: juan.basilio@waposat.com
