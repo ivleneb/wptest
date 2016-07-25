@@ -149,6 +149,21 @@ box-shadow: 3px 3px 5px #cccccc;
 margin-left: 2%;
 margin-right: 2%;
 margin-top: 30px;}
+
+#infoscada{float: left;
+margin-left: 2%;
+margin-right: 2%;
+margin-top: 20px;
+font-family: sans-serif;
+font-size: 11px;
+text-transform: uppercase;}
+
+.infoscadacelda{
+    border-left: solid 1px #ffffff;
+border-top: solid 1px #ffffff;
+border-bottom:  solid 1px #ffffff;
+}
+
 .logo{float:left;
 margin-left: 2%;
 margin-right: 2%;
@@ -255,7 +270,8 @@ width: 231px;
  background-color: #009e41;
  border-radius: 15px;
  color: #FFFFFF;
- float: left;
+
+ display: inline-block;
  text-align: center;
  line-height:20px;
  margin-left: 2px;
