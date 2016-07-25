@@ -57,8 +57,29 @@ function BlockDetail(idstation=1)
  
 }
 
+function UpdateBlock(id)
+{
+ 
+    $.getJSON('dashboard/update/process/'+id, function(data) {
+         
+     $.each(data.StationBlock, function(key, val) {
+         $("#RiskStation"+val.id).html(val.NumRisk);
+         $("#DangerStation"+val.id).html(val.NumDanger);
+   
+   $.each(data.StationBlock[key].Sensor, function(k, v) {
+    $('#sensor'+v.id).html(v.Last.Value);
+   });
+        
+    });
+    });
+    
+}
+
+
 function ShowBlock(id,risk=1,danger=1,stable=1)
 {
+  
+    
     
 $("section").html('<div class=Block><div class=filtros>\n\
 <form id="formulario" name=formulario>\n\
@@ -69,6 +90,8 @@ Puntos de Monitorea (<span id="puntos">0</span>) \n\
 </div>\n\
 <div id=main class="boxcols"></div></div><div class=DetailBlock></div>');
 $.getJSON('dashboard/process/'+id, function(data) {
+    
+ setTimeout('UpdateBlock('+id+')', 3000);
  
  var cadena="";
   $("#puntos").html(data.StationBlock.length);
@@ -80,9 +103,9 @@ $.getJSON('dashboard/process/'+id, function(data) {
   estilo=''; 
   
       if(val.NumRisk>0)
-      {Risk='<div  class=InfoRisk>' + val.NumRisk +'</div>';}
+      {Risk='<div  class=InfoRisk id=RiskStation'+val.id+'>' + val.NumRisk +'</div>';}
       if(val.NumDanger>0)
-      {Danger='<div  class=InfoDanger>' + val.NumDanger +'</div>';}
+      {Danger='<div  class=InfoDanger id=DangerStation'+val.id+'>' + val.NumDanger +'</div>';}
       
       if(val.NumDanger==0 && val.NumRisk==0 )
       {Icono=''; 
@@ -97,7 +120,7 @@ $.getJSON('dashboard/process/'+id, function(data) {
    cadena+='<div class="box"><div class="Panel"><div class='+estilo+'><table class=TablaPanel><tr><td class=PanelAlerta>'+Icono+'</td><td class=PanelTitulo onclick="ShowPoint('+ val.id +')">'+ val.Name +'<br>' + val.CodeName +'</td><td align=right width="30%">'+ Danger + Risk +'</td></tr></table></div><div class=PanelBody>';
    
       $.each(data.StationBlock[key].Sensor, function(k, v) {
-    cadena+='<div class=PanelDetalle><span>' + v.CodeName +': </span><span> ' + v.Last.Value +'</span></div>';
+    cadena+='<div class=PanelDetalle><span>' + v.CodeName +': </span><span id=sensor'+v.id+'> ' + v.Last.Value +'</span></div>';
    });
    
    cadena+='</div></div></div>';
@@ -131,7 +154,7 @@ $.getJSON('dashboard/station/'+id,function(data){
       estilo='PanelHeadDanger';}
   
 $(".DetailBlock").html("<table class=TablaPoint>\n\
-<tr><td><div class='"+estilo+"' ><table cellpadding=10 width=100%><tr><td style='color:#FFFFFF'><div Class=PanelAlerta>"+ Icono +"</div> "+data.Name+"<br>"+data.CodeName+"</td><td align=right><div class='MenuRight' onclick='BlockDetail("+data.id +");pushRight.open()'><i class='fa fa-bars' aria-hidden='true'></i></div></td></tr></table></div></td></tr>\n\
+<tr><td><div class='"+estilo+"' ><table cellpadding=10 width=100%><tr><td width=20><div Class=PanelAlerta style='color:#FFFFFF;font-size:22px'>"+ Icono +"</div></td><td style='color:#FFFFFF'> "+data.Name+"<br>"+data.CodeName+"</td><td align=right><div class='MenuRight' onclick='BlockDetail("+data.id +");pushRight.open()'><i class='fa fa-bars' aria-hidden='true'></i></div></td></tr></table></div></td></tr>\n\
 <tr><td> <div id=ChartGauge class=Group></div></div></td></tr>\n\
 <tr><td align=center>\n\
 <table>\n\
@@ -154,8 +177,7 @@ var n;
      $('#chart'+k).append("<label style='cursor:pointer' onclick=showparameter("+id +","+v.id +",20)>"+v.Name+"</label>");
     });
     
-$(".DetailBlock").css("width","50%");
-$(".Block").css("width","50%");
+
 calBoxCol();
 ResizeCol();
     
@@ -220,7 +242,7 @@ if (type==2) {ruta="v2/dashboard";
    $("section").css("background-color","#ffffff"); 
    $("header").html('<a class="icon" onclick="pushLeft.open()"><i class="fa fa-bars" aria-hidden="true"></i></a>\n\
                      <div class=logo><img src="public/img/waposat-logo-flat.png" class=LogoToolBar></div>\n\
-                     <div class=user><label class=labelExport>'+data.HiUser+'</label></div>\n\
+                     <div class=user><label class=labelExport>'+data.HiUser+'</label></div><div id=infoscada></div>\n\
                      <a class="icon-close" id=Close><i class="fa fa-power-off" aria-hidden="true"></i></a>\n\
                      <div class="BoxAlert"><i class="fa fa-bell" aria-hidden="true" style="float:left"></i> <label class=labelExport><span class="InfoDanger InfoLittle ">'+data.NumDanger+'</span><span class="InfoRisk InfoLittle ">'+ data.NumRisk+'</span></label></div>\n\
                      <div class="Export" onclick="Export()"><i class="fa fa-share-square-o" aria-hidden="true"></i> <label class=labelExport>Exportar</label></div>\n\
@@ -378,6 +400,23 @@ function Export()
     }
     
 
+
+function UpdatePlain(id)
+{
+ $.getJSON("v2/dashboard/update/process/"+id,function(data){
+     
+      $("#infoscada").html("<table cellspacing=0 cellpadding=5><tr><td align=right>PUNTOS DE<br>MONITOREO("+data.StationBlock.length+")</td><td class=infoscadacelda>Alerta: <span class='InfoRisk InfoLittle'>"+data.Risk.length+"</span></td><td  class=infoscadacelda> Cr\u00cdtico: <span class='InfoDanger InfoLittle'>"+data.Danger.length+"</span></td><td class=infoscadacelda style='border-right:solid 1px #ffffff'> Estable:<span  class='InfoStable InfoLittle'>0</span></td></tr></table>");
+
+            $.each(data.StationBlock,function(key,value){  
+               
+                 $.each(value.Sensor,function(k,v){
+                     
+                     $("#sensor"+v.id).html("n"+v.Last.Value);
+                 });
+            });
+        });
+}
+
 function ShowPlain(id=1)
     {
       var items = [];
@@ -387,7 +426,13 @@ function ShowPlain(id=1)
      items.push('<div id="owl-demo" class="owl-carousel owl-theme">');
      
         $.getJSON("v2/dashboard/process/"+id,function(data){
+            
+            setTimeout('UpdatePlain('+id+')',3000);
+            
+            
             $.each(data.StationBlock,function(key,value){
+
+$("#infoscada").html("<table cellspacing=0 cellpadding=5><tr><td align=right>PUNTOS DE<br>MONITOREO ("+data.StationBlock.length+")</td><td class=infoscadacelda>Alerta: <span class='InfoRisk InfoLittle'>"+data.Risk.length+"</span></td><td  class=infoscadacelda> Cr\u00cdtico: <span class='InfoDanger InfoLittle'>"+data.Danger.length+"</span></td><td class=infoscadacelda style='border-right:solid 1px #ffffff'> Estable:<span  class='InfoStable InfoLittle'>0</span></td></tr></table>");
 
   puntos="<div style='height:120px'><table align=center border=0>";
   $.each(value.Sensor,function(k,v){
@@ -397,13 +442,13 @@ function ShowPlain(id=1)
       if(v.LastValue>=v.LMP)
       {extra=' InfoDanger ';}
       
-     puntos+='<tr onclick=ShowDetail('+value.id+','+v.id+')><td><div class="' + extra + ' InfoLittlePoint"> </div></td><td align=left>'+ v.CodeName+'</td><td align=left>: '+v.Last.Value+'</td></tr>'; 
+     puntos+='<tr onclick=ShowDetail('+value.id+','+v.id+')><td><div class="' + extra + ' InfoLittlePoint"> </div></td><td align=left>'+ v.CodeName+'</td><td align=left>: <span id=sensor'+ v.id +'>'+v.Last.Value+'<span></td></tr>'; 
   });
   
   
   puntos+="</table></div>"
   
-             items.push('<div class="item"><div class=PlainBox>'+ value.CodeName +'</div><br>'+ puntos+'<br>'+ value.Name +'<br><div style="background-image:url('+pathIMG+value.URL +'.png); background-position:top center;height:250px"></img src="ScriptFrontEnd/Screen2/'+value.URL +'"></div></div>');
+             items.push('<div class="item"><div class=PlainBox>'+ value.CodeName +'</div><br>'+ puntos+'<br>'+ value.Name +'<br><div style="background-image:url('+pathIMG+'PM-0'+value.URL +'.png); background-position:top center;height:250px"></img src="ScriptFrontEnd/Screen2/'+value.URL +'"></div></div>');
  });
            
            
@@ -509,7 +554,19 @@ pushRight.open();
 	var contentWidth = $('.Group').width();
 	var boxCols = 0;
         var boxwidth;
-	
+
+      
+        if($(document).width()<=800)
+        {
+$(".DetailBlock").css("width","100%");
+$(".Block").css("width","100%");   
+        }
+else
+{
+$(".DetailBlock").css("width","50%");
+$(".Block").css("width","50%");   
+}
+      
        if (contentWidth > 1400){
 		boxCols = 7;
 		boxwidth = Math.floor(contentWidth / boxCols) * 0.99;
