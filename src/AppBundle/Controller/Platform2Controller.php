@@ -30,6 +30,7 @@
     		$user = $this->getUser();
 			
     		$em = $this->getDoctrine()->getManager();
+
 			$dql = "SELECT up FROM AppBundle:UsersBlocks up JOIN up.idBlock b JOIN b.idBlockType t WHERE (up.idUser = ".$user->getId()." AND t.blockType = 1)";
     		$query = $em->createQuery($dql);
     		$u_plants = $query->getResult();
@@ -44,7 +45,7 @@
 
     		foreach ($u_plants as $plant) 
     		{
-    			$PlantBlock[] = $lD->LoadAction($plant->getIdBlock()->getId(), 0);
+    			$PlantBlock[] = $lD->LoadAction($plant->getIdBlock()->getId(), $user->getId());
     		}
 
     		if (count($u_plants)==1) 

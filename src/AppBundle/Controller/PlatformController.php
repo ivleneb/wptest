@@ -93,9 +93,9 @@
 		}
 
 		/**
-		 * @Route("/dashboard/update/process/{idProcess}", name="processBlockUpdate")
+		 * @Route("/dashboard/update/process/{idProcess}/states/{critical}/{alert}/{stable}", name="processBlockUpdate")
 		 */
-		public function processBlockUpdateAction($idProcess)
+		public function processBlockUpdateAction($idProcess, $critical=1, $alert=1, $stable=1)
 		{
 			//Verify is user is logged
 			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
@@ -107,11 +107,12 @@
 			$lD = $this->get('app.dataloader');
 			$lD->setupUser($user);
     		$lD->retrieveSensorData(1, 0, 0, 0, 0, 0);
-			$lD->retrieveStationData();
+			$lD->retrieveStationData($critical, $alert, $stable);
 			$lD->retrieveProcessData();
 			
 
-			$Process = $lD->UpdateAction($idProcess, 1, 0, 0, 1, 0, 0, 0, 0/*, $idUser*/);
+			//$Process = $lD->UpdateAction($idProcess, 1, 0, 0, 1, 0, 0, 0, 0/*, $idUser*/);
+			$Process = $lD->LoadAction($idProcess, 1);
 
     		return new Response(json_encode($Process));
 			

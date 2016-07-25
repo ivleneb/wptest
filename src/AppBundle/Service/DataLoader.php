@@ -14,6 +14,7 @@
 		private $vectorEvents;
 		private $riskS = 0, $dangerS = 0;
 		private $riskP = 0, $dangerP = 0;
+		private $critical, $alert, $stable;
 		private $requiredSensors = 4;
 		private $loadStationData = 0, $loadProcessData = 0, $loadSensorData = 0;
 		private $basic_stat=0, $basic_info=0, $limits=0, $long=0, $addData=0, $uselastId=0;
@@ -41,9 +42,12 @@
 			$this->uselastId = $uselastId;
 		}
 
-		public function retrieveStationData()
+		public function retrieveStationData($critical = 1 , $alert = 1, $stable = 1)
 		{
 			$this->loadStationData = 1;
+			$this->critical = $critical;
+			$this->alert = $alert;
+			$this->stable = $stable;
 		}
 
 		public function retrieveProcessData($vectorEvents=0)
@@ -65,64 +69,83 @@
 			if ($block_type == 3) 
 			{
 
-				//if ($this->loadStationData == 1) 
-				//{
-					$stationA = array();
+				$stationA = array();
 
-					$stationA["id"] = $block[0]->getId();
+				$stationA["id"] = $block[0]->getId();
 
-					$this->blockInfo($stationA, $block[0]);
+				$this->blockInfo($stationA, $block[0]);
 
-					$dql = "SELECT e FROM AppBundle:MonitoringEvents e, AppBundle:NotificationsAlert n, AppBundle:BlockSensors bs WHERE n.idUser = ".$this->id_user." AND n.viewed = 0 AND n.idMonitoringEvent = e.idMonitoringEvent AND e.idBlockSensor = bs.id AND bs.idBlock = ".$block[0]->getId();
-					$query = $em->createQuery($dql);
-					$events = $query->getResult();
+				$dql = "SELECT e FROM AppBundle:MonitoringEvents e, AppBundle:NotificationsAlert n, AppBundle:BlockSensors bs WHERE n.idUser = ".$this->id_user." AND n.viewed = 0 AND n.idMonitoringEvent = e.idMonitoringEvent AND e.idBlockSensor = bs.id AND bs.idBlock = ".$block[0]->getId();
+				$query = $em->createQuery($dql);
+				$events = $query->getResult();
 
-					if ($countEvents) 
+				if ($countEvents) 
+				{
+					$t = $this->countDangerAndRisks($events);
+					$stationA["NumRisk"] = $t['risk'];
+					$stationA["NumDanger"] = $t['danger'];
+					if ($stationA["NumDanger"] > 0) 
 					{
-						$t = $this->countDangerAndRisks($events);
-						$stationA["NumRisk"] = $t['risk'];
-						$stationA["NumDanger"] = $t['danger'];
-						$this->riskS = $this->riskS + $t['risk'];
-						$this->dangerS = $this->dangerS + $t['danger'];
-
-					}else if($this->vectorEvents)
+						$stationA["state"] = 3;
+						//$state = 3; //critical
+					} else if ($stationA["NumRisk"] >0)
 					{
-						foreach ($events as $event)
-						{
-							if ($event->getIdEventType()->getAlertType() == 'risk') 
-							{
-								$this->risk2[] = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "SensorName" => $event->getIdMeasurement()->getIdSensor()->getCodename(), "IdSensor" => $event->getIdMeasurement()->getIdSensor()->getIdSensor());  
-							} else if ($event->getIdEventType()->getAlertType() == 'danger') 
-							{
-								$this->danger2[] = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "SensorName" => $event->getIdMeasurement()->getIdSensor()->getCodename(), "IdSensor" => $event->getIdMeasurement()->getIdSensor()->getIdSensor());    
-							} 
-
+						$stationA["state"] = 2;
+						//$state = 2; //alert
+					} else 
+					{
+						$stationA["state"] = 1;
+						//$state = 1; //stable
 						}
-					}
+					
+					$this->riskS = $this->riskS + $t['risk'];
+					$this->dangerS = $this->dangerS + $t['danger'];
 
-					$stationA["RefreshFrecuencySeg"] = $block[0]->getRefresh();
-
-
-					if ($this->loadSensorData == 1) 
+				}else if($this->vectorEvents)
+				{
+					foreach ($events as $event)
 					{
-						$temp = array();
-						$temp1 = $this->selectSensors($block[0]->getId());
-
-				 		foreach($temp1 as $Sensor)
+						if ($event->getIdEventType()->getAlertType() == 'risk') 
 						{
-							$temp[] = $this->SensorDataAction($Sensor->getIdSensor(), $block[0]->getId());
-						}
-
-						$stationA["Sensor"] = $temp;
+							$this->risk2[] = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "SensorName" => $event->getIdMeasurement()->getIdSensor()->getCodename(), "IdSensor" => $event->getIdMeasurement()->getIdSensor()->getIdSensor());  
+						} else if ($event->getIdEventType()->getAlertType() == 'danger') 
+						{
+							$this->danger2[] = array("id" => $block[0]->getId(), "Name" => $block[0]->getBlockName(), "CodeName" => $block[0]->getBlockCodeName(), "SensorName" => $event->getIdMeasurement()->getIdSensor()->getCodename(), "IdSensor" => $event->getIdMeasurement()->getIdSensor()->getIdSensor());    
+						} 
 					}
+				}
 
+				$stationA["RefreshFrecuencySeg"] = $block[0]->getRefresh();
+
+
+				if ($this->loadSensorData == 1) 
+				{
+					$temp = array();
+					$temp1 = $this->selectSensors($block[0]->getId());
+
+				 	foreach($temp1 as $Sensor)
+					{
+						$temp[] = $this->SensorDataAction($Sensor->getIdSensor(), $block[0]->getId());
+					}
+					$stationA["Sensor"] = $temp;
+				}
+
+				if ($stationA["state"] == 3 && $this->critical) 
+				{
 					return $stationA;
+				} else if ($stationA["state"] == 2 && $this->alert)
+				{
+					return $stationA;
+				}
+				elseif ($stationA["state"] == 1 && $this->stable) 
+				{
+					return $stationA;
+				}
+				else
+				{
+					return null;
+				}
 
-				//} else 
-				//{
-				//	return;
-				//}
-				
 			} else 
 			{
 
@@ -132,7 +155,11 @@
 
 				foreach ($child_blocks as $cb) 
 				{
-					$temp[] = $this->LoadAction($cb->getId(), $countEvents); 
+					$ihplt = $this->LoadAction($cb->getId(), $countEvents);	
+					if ($ihplt) 
+					{
+						$temp[] =$ihplt;
+					}   
 				}
 
 				$blockA = array("id" => $block[0]->getId());
@@ -441,7 +468,7 @@
 			if (count($relevance)>$num) 
 			{	
 				$counter = 0;
-				foreach ($relevance as $s) 
+				foreach ($relevance as $key => $obj) 
 				{
 					$temp[] = $obj;
 					$counter++;
@@ -472,10 +499,14 @@
 		public function sensorInfo(&$sensorA, $bSensor = null )
 		{
 			$sensor = $bSensor->getIdSensor();
+			$station = $bSensor->getIdBlock();
 			$sensorA['Name'] = $sensor->getIdSensorModel()->getIdParameter()->getParameterName();
 			$sensorA['CodeName'] = $sensor->getCodename();
 			$sensorA['Unit'] = $sensor->getIdSensorModel()->getIdMeasurementUnit()->getCode();
-			$sensorA['idStationBlock'] = $bSensor->getIdBlock()->getId();
+			$sensorA['idStationBlock'] = $station->getId();
+			$sensorA['nameStation'] = $station->getBlockName();
+			$sensorA['codenameStation'] = $station->getBlockCodename();
+
 		}
 
 		public function sensorBasicStat(&$SensorData, $LastVals)
