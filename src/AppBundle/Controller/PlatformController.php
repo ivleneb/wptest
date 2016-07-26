@@ -62,9 +62,9 @@
 
 
 		/**
-		 * @Route("/dashboard/process/{idProcess}", name="processBlock")
+		 * @Route("/dashboard/process/{idProcess}/states/{critical}/{alert}/{stable}", name="processBlock")
 		 */
-		public function processBlockAction($idProcess)
+		public function processBlockAction($idProcess, $critical=1, $alert=1, $stable=1)
 		{
 			//Verify is user is logged
 			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
@@ -77,10 +77,10 @@
 			$lD = $this->get('app.dataloader');
 			$lD->setupUser($user);
 			$lD->retrieveSensorData(1, 0, 0, 0, 0);
-			$lD->retrieveStationData();
+			$lD->retrieveStationData($critical, $alert, $stable);
 			$lD->retrieveProcessData();
 
-			$Process = $lD->LoadAction($idProcess, $user->getId());
+			$Process = $lD->LoadAction($idProcess /*$user->getId()*/);
 
 			/*$encoders = array(new JsonEncoder());
 			$normalizers = array(new ObjectNormalizer());
@@ -93,9 +93,9 @@
 		}
 
 		/**
-		 * @Route("/dashboard/update/process/{idProcess}/states/{critical}/{alert}/{stable}", name="processBlockUpdate")
+		 * @Route("/dashboard/update/process/{idProcess}", name="processBlockUpdate")
 		 */
-		public function processBlockUpdateAction($idProcess, $critical=1, $alert=1, $stable=1)
+		public function processBlockUpdateAction($idProcess)
 		{
 			//Verify is user is logged
 			if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) 
@@ -107,7 +107,7 @@
 			$lD = $this->get('app.dataloader');
 			$lD->setupUser($user);
     		$lD->retrieveSensorData(1, 0, 0, 0, 0, 0);
-			$lD->retrieveStationData($critical, $alert, $stable);
+			$lD->retrieveStationData();
 			$lD->retrieveProcessData();
 			
 
@@ -257,16 +257,6 @@
     		return new Response(json_encode($Station));
 			
 		}
-
-		/**
-		 * @Route("/dashboard/report/manual/", name="reportBoard")
-		 */
-		/*public function AlertUpdateAction()
-		{
-			
-			
-		}
-*/
 
 	}
 

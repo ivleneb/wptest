@@ -216,16 +216,6 @@
 			
 		}
 
-		/**
-		 * @Route("/v2/dashboard/report/manual/", name="reportBoard")
-		 */
-		/*public function AlertUpdateAction()
-		{
-			
-			
-		}
-*/
-
 	}
 
  ?>

@@ -96,7 +96,7 @@
 					{
 						$stationA["state"] = 1;
 						//$state = 1; //stable
-						}
+					}
 					
 					$this->riskS = $this->riskS + $t['risk'];
 					$this->dangerS = $this->dangerS + $t['danger'];
@@ -130,10 +130,15 @@
 					$stationA["Sensor"] = $temp;
 				}
 
-				if ($stationA["state"] == 3 && $this->critical) 
+				if ($countEvents == 0)
 				{
 					return $stationA;
-				} else if ($stationA["state"] == 2 && $this->alert)
+				}
+				elseif ($stationA["state"] == 3 && $this->critical) 
+				{
+					return $stationA;
+				}
+				elseif ($stationA["state"] == 2 && $this->alert)
 				{
 					return $stationA;
 				}
@@ -158,7 +163,7 @@
 					$ihplt = $this->LoadAction($cb->getId(), $countEvents);	
 					if ($ihplt) 
 					{
-						$temp[] =$ihplt;
+						$temp[] = $ihplt;
 					}   
 				}
 

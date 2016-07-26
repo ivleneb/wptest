@@ -176,13 +176,13 @@ class appDevUrlMatcher extends Symfony\Bundle\FrameworkBundle\Routing\Redirectab
             }
 
             // processBlock
-            if (0 === strpos($pathinfo, '/dashboard/process') && preg_match('#^/dashboard/process/(?P<idProcess>[^/]++)$#s', $pathinfo, $matches)) {
-                return $this->mergeDefaults(array_replace($matches, array('_route' => 'processBlock')), array (  '_controller' => 'AppBundle\\Controller\\PlatformController::processBlockAction',));
+            if (0 === strpos($pathinfo, '/dashboard/process') && preg_match('#^/dashboard/process/(?P<idProcess>[^/]++)/states(?:/(?P<critical>[^/]++)(?:/(?P<alert>[^/]++)(?:/(?P<stable>[^/]++))?)?)?$#s', $pathinfo, $matches)) {
+                return $this->mergeDefaults(array_replace($matches, array('_route' => 'processBlock')), array (  'critical' => 1,  'alert' => 1,  'stable' => 1,  '_controller' => 'AppBundle\\Controller\\PlatformController::processBlockAction',));
             }
 
             // processBlockUpdate
-            if (0 === strpos($pathinfo, '/dashboard/update/process') && preg_match('#^/dashboard/update/process/(?P<idProcess>[^/]++)/states(?:/(?P<critical>[^/]++)(?:/(?P<alert>[^/]++)(?:/(?P<stable>[^/]++))?)?)?$#s', $pathinfo, $matches)) {
-                return $this->mergeDefaults(array_replace($matches, array('_route' => 'processBlockUpdate')), array (  'critical' => 1,  'alert' => 1,  'stable' => 1,  '_controller' => 'AppBundle\\Controller\\PlatformController::processBlockUpdateAction',));
+            if (0 === strpos($pathinfo, '/dashboard/update/process') && preg_match('#^/dashboard/update/process/(?P<idProcess>[^/]++)$#s', $pathinfo, $matches)) {
+                return $this->mergeDefaults(array_replace($matches, array('_route' => 'processBlockUpdate')), array (  '_controller' => 'AppBundle\\Controller\\PlatformController::processBlockUpdateAction',));
             }
 
             // stationBlock
