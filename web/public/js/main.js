@@ -84,12 +84,12 @@ function ShowBlock(id,risk=1,danger=1,stable=1)
 $("section").html('<div class=Block><div class=filtros>\n\
 <form id="formulario" name=formulario>\n\
 Puntos de Monitorea (<span id="puntos">0</span>) \n\
-<label><input type="checkbox" name="critico" '+(risk==1?'checked':'')+' onclick="ShowBlock('+id+',document.formulario.critico.checked,document.formulario.alerta.checked,document.formulario.estable.checked)" value=1> Critico</label>\n\
-<label><input type="checkbox" name="alerta" '+(danger==1?'checked':'')+' onclick="ShowBlock('+id+',document.formulario.critico.checked,document.formulario.alerta.checked,document.formulario.estable.checked)"  value=1> Alerta</label>\n\
-<label><input type="checkbox" name="estable" '+(stable==1?'checked':'')+' onclick="ShowBlock('+id+',document.formulario.critico.checked,document.formulario.alerta.checked,document.formulario.estable.checked)"  value=1> Estable</label></form>\n\
+<label><input type="checkbox" name="critico" '+(risk==1?'checked':'')+' onclick="ShowBlock('+id+',(document.formulario.critico.checked?1:0),(document.formulario.alerta.checked?1:0),(document.formulario.estable.checked?1:0))" value=1> Critico</label>\n\
+<label><input type="checkbox" name="alerta" '+(danger==1?'checked':'')+' onclick="ShowBlock('+id+',(document.formulario.critico.checked?1:0),(document.formulario.alerta.checked?1:0),(document.formulario.estable.checked?1:0))"  value=1> Alerta</label>\n\
+<label><input type="checkbox" name="estable" '+(stable==1?'checked':'')+' onclick="ShowBlock('+id+',(document.formulario.critico.checked?1:0),(document.formulario.alerta.checked?1:0),(document.formulario.estable.checked?1:0))"  value=1> Estable</label></form>\n\
 </div>\n\
 <div id=main class="boxcols"></div></div><div class=DetailBlock></div>');
-$.getJSON('dashboard/process/'+id, function(data) {
+$.getJSON('dashboard/process/'+id+'/states/'+risk+'/'+danger+'/'+stable, function(data) {
     
  setTimeout('UpdateBlock('+id+')', 3000);
  
@@ -405,13 +405,13 @@ function UpdatePlain(id)
 {
  $.getJSON("v2/dashboard/update/process/"+id,function(data){
      
-      $("#infoscada").html("<table cellspacing=0 cellpadding=5><tr><td align=right>PUNTOS DE<br>MONITOREO("+data.StationBlock.length+")</td><td class=infoscadacelda>Alerta: <span class='InfoRisk InfoLittle'>"+data.Risk.length+"</span></td><td  class=infoscadacelda> Cr\u00cdtico: <span class='InfoDanger InfoLittle'>"+data.Danger.length+"</span></td><td class=infoscadacelda style='border-right:solid 1px #ffffff'> Estable:<span  class='InfoStable InfoLittle'>0</span></td></tr></table>");
+      $("#infoscada").html("<table cellspacing=0 cellpadding=5><tr><td align=right>PUNTOS DE<br>MONITOREO ("+data.StationBlock.length+")</td><td class=infoscadacelda>Alerta: <span class='InfoRisk InfoLittle'>"+data.Risk.length+"</span></td><td  class=infoscadacelda> Cr\u00cdtico: <span class='InfoDanger InfoLittle'>"+data.Danger.length+"</span></td><td class=infoscadacelda style='border-right:solid 1px #ffffff'> Estable:<span  class='InfoStable InfoLittle'>0</span></td></tr></table>");
 
             $.each(data.StationBlock,function(key,value){  
                
                  $.each(value.Sensor,function(k,v){
                      
-                     $("#sensor"+v.id).html("n"+v.Last.Value);
+                     $("#sensor"+v.id).html(v.Last.Value);
                  });
             });
         });
