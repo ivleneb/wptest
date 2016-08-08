@@ -103,15 +103,6 @@
         		throw $this->createAccessDeniedException();
     		}
     		$user = $this->getUser();
-			
-			
-			/*$lD = $this->get('app.dataloader');
-			$lD->setupUser($user);
-    		$lD->retrieveSensorData(1, 0, 0, 0, 0, 0);
-			$lD->retrieveStationData();
-			$lD->retrieveProcessData();
-
-			$Process = $lD->UpdateAction($idProcess, 0, 0, 0, 0, 1, 0, 0, 0);*/
 
 			$lD = $this->get('app.dataloader');
 			$lD->setupUser($user);

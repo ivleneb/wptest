@@ -110,8 +110,6 @@
 			$lD->retrieveStationData();
 			$lD->retrieveProcessData();
 			
-
-			//$Process = $lD->UpdateAction($idProcess, 1, 0, 0, 1, 0, 0, 0, 0/*, $idUser*/);
 			$Process = $lD->LoadAction($idProcess, 1);
 
     		return new Response(json_encode($Process));
@@ -137,7 +135,7 @@
 			$lD->retrieveProcessData();
 			
 
-			$Station = $lD->LoadAction($idStation, $user->getId());
+			$Station = $lD->LoadAction($idStation);
 
     		return new Response(json_encode($Station));
 			
@@ -162,7 +160,7 @@
 			$lD->retrieveProcessData();
 			
 
-			$Station = $lD->UpdateAction($idStation, $user->getId());
+			$Station = $lD->LoadAction($idStation, $user->getId());
 
     		return new Response(json_encode($Station));
 			

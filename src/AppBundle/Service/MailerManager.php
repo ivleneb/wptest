@@ -130,9 +130,9 @@
 			return;
 		}*/
 
-		private function sendEmail($u_email = 'beenelvi.godoy@gmail.com', $info=null, $subject="no-Subject", $format='1')
+		public function sendEmail($u_email = 'beenelvi.godoy@gmail.com', $info=null, $subject="no-Subject", $format='1')
 		{
-			$message = \Swift_Message::newInstance()
+			/*$message = \Swift_Message::newInstance()
 		        ->setSubject($subject)
 		        ->setFrom('juan.basilio@waposat.com')
 		        ->setTo($u_email)
@@ -145,8 +145,8 @@
 		        )
 		    ;
 		    
-		    $this->mailer->send($message);
-		    //return new Response('<html><body>Email to '.$u_email.' sent!</body></html>', Response::HTTP_OK);
+		    $this->mailer->send($message);*/
+		    return $this->twig->render('Email/'.$format.'.html.twig', array('info' => $info));
 		}
 	}
 
