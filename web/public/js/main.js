@@ -3,7 +3,7 @@ var Risk="";
 var Danger="";
 var Icono=""; 
 var estilo=""; 
-
+ var  actualizar=null;
 var pathIMG="public/img/"; 
 var nodo=null;
 var pushLeft=null; 
@@ -90,8 +90,10 @@ Puntos de Monitorea (<span id="puntos">0</span>) \n\
 </div>\n\
 <div id=main class="boxcols"></div></div><div class=DetailBlock></div>');
 $.getJSON('dashboard/process/'+id+'/states/'+risk+'/'+danger+'/'+stable, function(data) {
-    
- setTimeout('UpdateBlock('+id+')', 3000);
+
+ clearInterval(actualizar)
+ 
+ actualizar=setInterval('UpdateBlock('+id+')', (data.RefreshFrecuencySeg*1000));
  
  var cadena="";
   $("#puntos").html(data.StationBlock.length);
@@ -125,7 +127,9 @@ $.getJSON('dashboard/process/'+id+'/states/'+risk+'/'+danger+'/'+stable, functio
    
    cadena+='</div></div></div>';
    $("#main").html(cadena); 
+   
    calBoxCol();
+   ResizeCol();
 pushLeft.close();
   });
 
@@ -177,9 +181,9 @@ var n;
      $('#chart'+k).append("<label style='cursor:pointer' onclick=showparameter("+id +","+v.id +",20)>"+v.Name+"</label>");
     });
     
-
-calBoxCol();
 ResizeCol();
+calBoxCol();
+
     
 });
 
@@ -427,8 +431,11 @@ function ShowPlain(id=1)
      
         $.getJSON("v2/dashboard/process/"+id,function(data){
             
-            setTimeout('UpdatePlain('+id+')',3000);
-            
+           
+clearInterval(actualizar)
+
+actualizar=setInterval('UpdatePlain('+id+')', (data.RefreshFrecuencySeg*1000));
+ 
             
             $.each(data.StationBlock,function(key,value){
 
@@ -486,8 +493,8 @@ $("#infoscada").html("<table cellspacing=0 cellpadding=5><tr><td align=right>PUN
        type:'GET',
        dataType: 'json',
        success:function(data){
-           $(".DetailParameter").append('<div class="DetailAlert"><div class=PanelAlerta><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></div>'+data['Name']+ '</div>');
-           $(".DetailParameter").append('<table align=center border=0 ><tr><td align=center><div id=Chart></div></td><td rowspan=2  align=center><div class="DetailValue"><table><tr><td>Minimo:</td><td><label>'+data['MinValue'].toFixed(2)+ '</label></td></tr><tr><td>Medio:</td><td><label>'+data['MeanValue'].toFixed(2) +'</label></td></tr><tr><td>Maximo:</td><td><label>'+data['MaxValue'].toFixed(2) +'</label></td></tr></table></div></td></tr><tr><td><div class="DetailChart"></div></td></tr><tr><td colspan=2 align=center> <label class=DetailLabel>Limites máximos establecidos por la OMS</label></td></tr><tr><td colspan=2><div id=ChartLines>000</div></td></tr><tr><td><select name=long onchange=ShowDetail('+idstation+','+idsensor+',this.value)><option value="20" '+(long==20?'selected':'')+'>20 puntos</option><option value="10" '+(long==10?'selected':'')+'>10 puntos</option></select> <div id=limites><label>Limite: '+data['LMR']+' - '+data['LMP']+'</label> <i class="fa fa-cog" aria-hidden="true"></i></div></td></tr></table>');
+           $(".DetailParameter").append('<div class="DetailAlert"><table border=0 cellpadding=0 cellspacing=0><tr><td rowspan=3 width=55><div class=PanelAlerta style="font-size:30px"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></div></td><td align=center width=180 colspan=2 style="font-size:11px;font-weight:bold;text-transform:uppercase;">'+data['nameStation']+'</td></tr><tr><td colspan=2 align=center style="font-size:20px;font-weight:bold;text-transform:uppercase;">'+data['Name']+ '</td></tr><tr><td align=center>' +data['codenameStation']+'</td><td align=center>' +data['CodeName']+'</td></tr></table></div>');
+           $(".DetailParameter").append('<table align=center border=0><tr><td align=center><div id=Chart></div></td><td rowspan=2  align=center><div class="DetailValue"><table><tr><td>Minimo:</td><td><label>'+data['MinValue'].toFixed(2)+ '</label></td></tr><tr><td>Medio:</td><td><label>'+data['MeanValue'].toFixed(2) +'</label></td></tr><tr><td>Maximo:</td><td><label>'+data['MaxValue'].toFixed(2) +'</label></td></tr></table></div></td></tr><tr><td><div class="DetailChart"></div></td></tr><tr><td colspan=2 align=center> <label class=DetailLabel>Limites máximos establecidos por la OMS</label></td></tr><tr><td colspan=2><div id=ChartLines>000</div></td></tr><tr><td align=right><select name=long onchange=ShowDetail('+idstation+','+idsensor+',this.value)><option value="20" '+(long==20?'selected':'')+'>20 puntos</option><option value="10" '+(long==10?'selected':'')+'>10 puntos</option></select></td><td> <div id=limites><label>Limite: '+data['LMR']+' - '+data['LMP']+'</label> <i class="fa fa-cog" aria-hidden="true"></i></div></td></tr></table>');
            
             n=((data['Last']['Value']*100)/data['MP']);
        
