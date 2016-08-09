@@ -74,9 +74,14 @@ template {
   border: 1px solid;
   border-color: #f6b1b1;
 }
+#fechas{
+  border: 2.5px solid #c0c0c0;
+  font-size: 2.5em;
+}
+
 #titulo-fechas{
-  font-size: 10px;
-      padding-left: 25px;
+  font-size: 1em;
+  padding-left: 25px;
 }
 .hr-inicio{
     border: 1px solid #c0c0c0;

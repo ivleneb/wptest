@@ -282,7 +282,7 @@
 		}
 					
 
-		public function countDangerAndRisks(/*\AppBundle\Entity\MonitoringEvents*/ $events=null)
+		public function countDangerAndRisks($events=null)
 		{
 			$risk = $danger = 0;
 			foreach ($events as $event)
@@ -497,6 +497,23 @@
 			}
 
 			return array("mean"=>$mean/$cont,"max"=>$maxVal, "min"=>$minVal);
+
+		}
+
+		public function getBlocks($id_user, $block_type = 0)
+		{
+			if ($block_type == 0) 
+			{
+				$dql = "SELECT b FROM AppBundle:Blocks b, AppBundle:UsersBlocks Ub WHERE Ub.idBlock = b.id AND Ub.idUser = ".$id_user;
+			} else 
+			{
+				$dql = "SELECT b FROM AppBundle:UsersBlocks Ub, AppBundle:Blocks b JOIN b.idBlockType Bt WHERE Bt.blockType = ".$block_type." AND Ub.idBlock = b.id AND Ub.idUser = ".$id_user;
+			}
+			
+			$query = $this->entityManager->createQuery($dql);
+			$blocks = $query->getResult();
+
+			return $blocks;
 
 		}
 

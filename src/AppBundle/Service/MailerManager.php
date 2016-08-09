@@ -132,7 +132,7 @@
 
 		public function sendEmail($u_email = 'beenelvi.godoy@gmail.com', $info=null, $subject="no-Subject", $format='1')
 		{
-			/*$message = \Swift_Message::newInstance()
+			$message = \Swift_Message::newInstance()
 		        ->setSubject($subject)
 		        ->setFrom('juan.basilio@waposat.com')
 		        ->setTo($u_email)
@@ -145,8 +145,9 @@
 		        )
 		    ;
 		    
-		    $this->mailer->send($message);*/
-		    return $this->twig->render('Email/'.$format.'.html.twig', array('info' => $info));
+		    $this->mailer->send($message);
+		    return 0;
+		    //return $this->twig->render('Email/'.$format.'.html.twig', array('info' => $info));
 		}
 	}
 
