@@ -1,12 +1,143 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title></title>
-</head>
-<body>
-	<h1>Hola MA</h1>
-	{% for noti in info %}
-	   <p>{{noti.idNotificationAlert}}</p> 
-	{% endfor %}
-</body>
-</html>
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Reporte
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('public/css/reportStyles/bootstrap.css') }}">
+{% endblock %}
+
+{% block body %}
+	<div class="container">
+		<div class="col-md-10">
+			<p><br>Buen dia, Sr. {{ info.user.name }} {{info.user.lastName}} </p>
+
+			<p >Al igual que cada semana, remitimos este correo para mantenerlo al tanto del estado actual sobre la planta que digire, por lo tanto le informamos:</p>
+		</div>
+		<br><br>
+		<div class="col-md-4">
+		{% if info.numDanger == 0 %}
+			{% if info.numRisk == 0 %}
+			<img src="{{ asset('public/img/reportImg/reporte-w-gerente1.jpg')}}" id="img-info">
+			{% else %}
+			<img src="{{ asset('public/img/reportImg/reporte-w-gerente2.jpg')}}" id="img-info">
+			{% endif %} 
+		{% else %}   	
+			<img src="{{ asset('public/img/reportImg/reporte-w-gerente3.jpg')}}" id="img-info">
+		{% endif %}
+		</div>
+		<br>
+		<div class="col-md-6">
+			<p id="titulo-fechas">Fecha de inicio de reporte de monitoreo:<br>
+			<h2 id="fechas" style="color:#1d59bf;"><img src="{{ asset('public/img/reportImg/calend.jpg') }}"> {{ info.from|date('F jS \\o\\f Y')}} <img src="{{ asset('public/img/reportImg/reloj.jpg') }}">{{info.from|date('g:ia')}}</h2>
+			</p>
+			<br>
+			<p id="titulo-fechas">Fecha final de reporte de monitoreo:<br>
+			<h2 id="fechas" style="color:#1d59bf;"><img src="{{ asset('public/img/reportImg/calend.jpg') }}"> {{info.to|date('F jS \\o\\f Y')}} <img src="{{ asset('public/img/reportImg/reloj.jpg') }}">{{info.to|date('g:ia')}}</h2>
+			</p>
+			<br><br>
+			<p>A fecha <b style="color:#1d59bf;">{{info.to|date('F jS \\a\\t g:ia')}}</b> los puntos de monitoreo registrados
+			{% if info.numDanger > 0 %}
+				presentaron <b style="color:#960303;">{{ info.numDanger }}  error(es) al sobrepasar los límites de estandar de calidad</b>.
+				{% if info.numRisk > 0 %}
+				Asi mismo, se registraron <b style="color:#f6b38e;">{{ info.numRisk }} incidentes</b>	 que tienen tendencia a acercarse al límite de error de estándar de calidad.
+				{% endif %} 
+			{% else %}   	
+				{% if info.numRisk == 0 %}
+				no presentan ninguna anomalía y <b style="color: green;">cada uno de los procesos cumplen con las normas de calidad</b>.
+				{% else %}
+				 presentaron <b style="color:#f6b38e;">{{ info.numRisk }}  incidentes</b> que tienen tendencia a acercarse al limite de error de estándar de calidad.
+				{% endif %}
+			{% endif %}
+			</p>
+		</div>		
+	</div>
+	<br>
+	<br>
+	{% if info.numDanger > 0 %}
+	<div class="container">
+		<div class="col-md-10">
+			<table class="table">
+				<thead>
+					<tr>
+					<th colspan="3"  id="th-titulo-peligro">Reporte de alertas ({{ info.numDanger }})</th>
+					</tr>
+					
+					<tr>
+						<th style="color:#b03333;">Puntos de monitoreo</th>
+						<th style="color:#b03333;">Código</th>
+						<th style="color:#b03333;"># errores</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for sE in info.stationsEvents %}
+					    {% if sE.danger > 0 %}
+						<tr>
+					    	<td>{{sE.station.blockName}}</td>
+					    	<td>{{sE.station.blockCodename}}</td>
+					    	<td>{{sE.danger}}</td>
+					    </tr>
+					    {% endif %}
+					{% endfor %}			
+				</tbody>
+				
+			</table>
+		</div>
+	</div>
+	{% endif %}
+
+	{% if info.numRisk > 0 %}
+	<div class="container">
+		<div class="col-md-10">
+			<table class="table">
+				<thead>
+					<tr>
+					<th colspan="3"  id="th-titulo-advertencia">Reporte de alertas ({{ info.numRisk }})</th>
+					</tr>
+					
+					<tr>
+						<th style="color:#dd8935;">Puntos de monitoreo</th>
+						<th style="color:#dd8935;">Código</th>
+						<th style="color:#dd8935;"># errores</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for sE in info.stationsEvents %}
+					    {% if sE.risk > 0 %}
+						<tr>
+					    	<td>{{sE.station.blockName}}</td>
+					    	<td>{{sE.station.blockCodename}}</td>
+					    	<td>{{sE.risk}}</td>
+					    </tr>
+					    {% endif %}
+					{% endfor %}
+				</tbody>
+				
+			</table>
+		</div>
+	</div>
+	{% endif %}
+
+	<div class="container">
+		<div class="col-md-10">
+			<p>Si necesita modificar el envío de fechas, puede comunicarse con nosotros a través de <u><a href="">reportes@waposat.com</a></u>. Recuerde que ante cualquier duda, estamos dispuestos a servirle.</p>
+			<br>
+			<br>
+			<p><b>Atentamente</b></p>
+			<p style="color:#1d59bf;">Soporte técnico waposat</p>
+
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="col-md-10">
+		<hr class="hr-inicio">
+			<p class="parrafo-final"><img src="{{ asset('public/img/reportImg/img4.png') }}" class="img-final">:Si no va a reciclar, no imprima este e-mail. Y si lo va a imprimir, use ambos lados. ¡Gracias!</p>
+		<hr class="hr-final">
+			<p class="parrafo-final2">El contenido del presente mensaje es de carácter confidencial, la información esrelevante y de exclusivo interés para su destinatario. En caso lo haya recibido por error deberá abstenerse de usarlo, reproducirlo o dinfudirlo en forma parcial o total; mucho agradecemos eliminarlo y notificarlo al remitente y/o a <u style="color:blue;"><a href="">reporte@waposat.com</a></u>.</p>
+			
+			<p class="parrafo-final2">El sistema de correo electrónico de Wapsat está destinado exclusivamente para sus propios fines conforme la Ley, normas y sus propias directivas. La información contenida está sujeta a la protección de derechos de autor y de las comunicaciones.</p>
+		</div>
+	</div>
+{% endblock %}

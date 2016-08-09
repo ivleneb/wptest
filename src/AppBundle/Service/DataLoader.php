@@ -87,7 +87,7 @@
 					if ($stationA["NumDanger"] > 0) 
 					{
 						$stationA["state"] = 3;
-						//$state = 3; //critical
+						//$state = 3;
 					} else if ($stationA["NumRisk"] >0)
 					{
 						$stationA["state"] = 2;
@@ -218,68 +218,6 @@
 			}
 		}	
 
-		public function UpdateAction($id_Block, $countEvents, $basic_stat=0, $lastId=0, $basic_info=0, $limits=0, $long=0, $addData=0, $send_Id_Station=0) 
-		{
-			//Obtener objeto bloque
-			$temp = array();
-			$em = $this->entityManager;
-			$dql = "SELECT b FROM AppBundle:Blocks b WHERE b.id = ".$id_Block;
-			$query = $em->createQuery($dql);
-			$block = $query->getResult();
-
-			if ($block[0]->getIdBlockType()->getBlockType() == 3) 
-			{
-
-				$dql = "SELECT bs FROM AppBundle:BlockSensors bs WHERE bs.idBlock = ".$block[0]->getId();
-				$query = $em->createQuery($dql);
-				$sensors = $query->getResult();
-				$temp = array();
-				foreach ($sensors as $s) 
-				{
-					$Sensor = $s->getIdSensor();
-
-					$temp[] = $this->SensorDataAction($Sensor->getIdSensor(), $block[0]->getId(), $basic_stat, $lastId, $basic_info, $limits, $long, $addData, $send_Id_Station);
-					
-				}
-
-				$stationA = array();
-
-				$stationA["id"] = $block[0]->getId();
-
-				if ($countEvents) 
-				{
-					$dql = "SELECT e FROM AppBundle:MonitoringEvents e, AppBundle:NotificationsAlert n, AppBundle:BlockSensors bs WHERE n.idUser = ".$this->id_user." AND n.viewed = 0 AND n.idMonitoringEvent = e.idMonitoringEvent AND e.idBlockSensor = bs.id AND bs.idBlock = ".$block[0]->getId();
-					$query = $em->createQuery($dql);
-					$events = $query->getResult(); 
-
-					$t = $this->countDangerAndRisks($events);
-					$stationA["NumRisk"] = $t['risk'];
-					$stationA["NumDanger"] = $t['danger'];
-				}
-
-				$stationA["Sensor"] = $temp;
-
-				return $stationA;
-
-				//return array("id" => $block[0]->getId(), "NumDanger"=>$danger, "NumRisk"=>$risk, "Sensor"=>$temp );
-
-			} else 
-			{
-				
-				$dql = "SELECT cb FROM AppBundle:Blocks cb WHERE cb.idParentBlock = ".$block[0]->getId();
-				$query = $em->createQuery($dql);
-				$child_blocks = $query->getResult();
-
-				foreach ($child_blocks as $cb) 
-				{
-					$temp[] = $this->UpdateAction($cb->getId(), $countEvents, $basic_stat, $lastId, $basic_info, $limits, $long, $addData, $send_Id_Station); 
-				}
-
-				return array("id" => $block[0]->getId(), "StationBlock"=>$temp);
-			}
-		}
-
-
 		public function AlertDataAction($update=0)
 		{
 			$em = $this->entityManager;
@@ -344,7 +282,7 @@
 		}
 					
 
-		public function countDangerAndRisks(/*\AppBundle\Entity\MonitoringEvents*/ $events=null)
+		public function countDangerAndRisks($events=null)
 		{
 			$risk = $danger = 0;
 			foreach ($events as $event)
@@ -559,6 +497,23 @@
 			}
 
 			return array("mean"=>$mean/$cont,"max"=>$maxVal, "min"=>$minVal);
+
+		}
+
+		public function getBlocks($id_user, $block_type = 0)
+		{
+			if ($block_type == 0) 
+			{
+				$dql = "SELECT b FROM AppBundle:Blocks b, AppBundle:UsersBlocks Ub WHERE Ub.idBlock = b.id AND Ub.idUser = ".$id_user;
+			} else 
+			{
+				$dql = "SELECT b FROM AppBundle:UsersBlocks Ub, AppBundle:Blocks b JOIN b.idBlockType Bt WHERE Bt.blockType = ".$block_type." AND Ub.idBlock = b.id AND Ub.idUser = ".$id_user;
+			}
+			
+			$query = $this->entityManager->createQuery($dql);
+			$blocks = $query->getResult();
+
+			return $blocks;
 
 		}
 

@@ -30,7 +30,7 @@
 
 			$time = new \DateTime();
 
-			if ($sender) 
+			if ($sender)  
 			{
 				$notifications = array();
 				foreach ($data as $id => $val) 
