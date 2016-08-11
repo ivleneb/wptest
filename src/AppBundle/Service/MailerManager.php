@@ -130,7 +130,7 @@
 			return;
 		}*/
 
-		public function sendEmail($u_email = 'beenelvi.godoy@gmail.com', $info=null, $subject="no-Subject", $format='1')
+		public function sendEmail($info=null, $u_email = 'beenelvi.godoy@gmail.com', $subject="Mailing Error", $format='error')
 		{
 			$message = \Swift_Message::newInstance()
 		        ->setSubject($subject)

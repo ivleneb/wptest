@@ -101,7 +101,7 @@
 
 				# Email Report to admin
 				$mm = $this->get('app.mailer');
-				$mm->sendEmail();
+				$mm->sendEmail("Someone(what) is trying to send an email report with Schedule Id:".$codeSchedule.", and Schedule:".$schedule.". Please check this Schedule.");
 
 				return new Response('<html><body>Email FAIL to send!</body></html>', Response::HTTP_OK);
 
