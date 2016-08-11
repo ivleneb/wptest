@@ -3,7 +3,7 @@ var Risk="";
 var Danger="";
 var Icono=""; 
 var estilo=""; 
-
+ var  actualizar=null;
 var pathIMG="public/img/"; 
 var nodo=null;
 var pushLeft=null; 
@@ -84,14 +84,16 @@ function ShowBlock(id,risk=1,danger=1,stable=1)
 $("section").html('<div class=Block><div class=filtros>\n\
 <form id="formulario" name=formulario>\n\
 Puntos de Monitorea (<span id="puntos">0</span>) \n\
-<label><input type="checkbox" name="critico" '+(risk==1?'checked':'')+' onclick="ShowBlock('+id+',document.formulario.critico.checked,document.formulario.alerta.checked,document.formulario.estable.checked)" value=1> Critico</label>\n\
-<label><input type="checkbox" name="alerta" '+(danger==1?'checked':'')+' onclick="ShowBlock('+id+',document.formulario.critico.checked,document.formulario.alerta.checked,document.formulario.estable.checked)"  value=1> Alerta</label>\n\
-<label><input type="checkbox" name="estable" '+(stable==1?'checked':'')+' onclick="ShowBlock('+id+',document.formulario.critico.checked,document.formulario.alerta.checked,document.formulario.estable.checked)"  value=1> Estable</label></form>\n\
+<label><input type="checkbox" name="critico" '+(risk==1?'checked':'')+' onclick="ShowBlock('+id+',(document.formulario.critico.checked?1:0),(document.formulario.alerta.checked?1:0),(document.formulario.estable.checked?1:0))" value=1> Critico</label>\n\
+<label><input type="checkbox" name="alerta" '+(danger==1?'checked':'')+' onclick="ShowBlock('+id+',(document.formulario.critico.checked?1:0),(document.formulario.alerta.checked?1:0),(document.formulario.estable.checked?1:0))"  value=1> Alerta</label>\n\
+<label><input type="checkbox" name="estable" '+(stable==1?'checked':'')+' onclick="ShowBlock('+id+',(document.formulario.critico.checked?1:0),(document.formulario.alerta.checked?1:0),(document.formulario.estable.checked?1:0))"  value=1> Estable</label></form>\n\
 </div>\n\
 <div id=main class="boxcols"></div></div><div class=DetailBlock></div>');
-$.getJSON('dashboard/process/'+id, function(data) {
-    
- setTimeout('UpdateBlock('+id+')', 3000);
+$.getJSON('dashboard/process/'+id+'/states/'+risk+'/'+danger+'/'+stable, function(data) {
+
+ clearInterval(actualizar)
+ 
+ actualizar=setInterval('UpdateBlock('+id+')', (data.RefreshFrecuencySeg*1000));
  
  var cadena="";
   $("#puntos").html(data.StationBlock.length);
@@ -125,7 +127,9 @@ $.getJSON('dashboard/process/'+id, function(data) {
    
    cadena+='</div></div></div>';
    $("#main").html(cadena); 
+   
    calBoxCol();
+   ResizeCol();
 pushLeft.close();
   });
 
@@ -177,9 +181,9 @@ var n;
      $('#chart'+k).append("<label style='cursor:pointer' onclick=showparameter("+id +","+v.id +",20)>"+v.Name+"</label>");
     });
     
-
-calBoxCol();
 ResizeCol();
+calBoxCol();
+
     
 });
 
@@ -405,13 +409,13 @@ function UpdatePlain(id)
 {
  $.getJSON("v2/dashboard/update/process/"+id,function(data){
      
-      $("#infoscada").html("<table cellspacing=0 cellpadding=5><tr><td align=right>PUNTOS DE<br>MONITOREO("+data.StationBlock.length+")</td><td class=infoscadacelda>Alerta: <span class='InfoRisk InfoLittle'>"+data.Risk.length+"</span></td><td  class=infoscadacelda> Cr\u00cdtico: <span class='InfoDanger InfoLittle'>"+data.Danger.length+"</span></td><td class=infoscadacelda style='border-right:solid 1px #ffffff'> Estable:<span  class='InfoStable InfoLittle'>0</span></td></tr></table>");
+      $("#infoscada").html("<table cellspacing=0 cellpadding=5><tr><td align=right>PUNTOS DE<br>MONITOREO ("+data.StationBlock.length+")</td><td class=infoscadacelda>Alerta: <span class='InfoRisk InfoLittle'>"+data.Risk.length+"</span></td><td  class=infoscadacelda> Cr\u00cdtico: <span class='InfoDanger InfoLittle'>"+data.Danger.length+"</span></td><td class=infoscadacelda style='border-right:solid 1px #ffffff'> Estable:<span  class='InfoStable InfoLittle'>0</span></td></tr></table>");
 
             $.each(data.StationBlock,function(key,value){  
                
                  $.each(value.Sensor,function(k,v){
                      
-                     $("#sensor"+v.id).html("n"+v.Last.Value);
+                     $("#sensor"+v.id).html(v.Last.Value);
                  });
             });
         });
@@ -427,8 +431,11 @@ function ShowPlain(id=1)
      
         $.getJSON("v2/dashboard/process/"+id,function(data){
             
-            setTimeout('UpdatePlain('+id+')',3000);
-            
+           
+clearInterval(actualizar)
+
+actualizar=setInterval('UpdatePlain('+id+')', (data.RefreshFrecuencySeg*1000));
+ 
             
             $.each(data.StationBlock,function(key,value){
 
@@ -486,8 +493,8 @@ $("#infoscada").html("<table cellspacing=0 cellpadding=5><tr><td align=right>PUN
        type:'GET',
        dataType: 'json',
        success:function(data){
-           $(".DetailParameter").append('<div class="DetailAlert"><div class=PanelAlerta><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></div>'+data['Name']+ '</div>');
-           $(".DetailParameter").append('<table align=center border=0 ><tr><td align=center><div id=Chart></div></td><td rowspan=2  align=center><div class="DetailValue"><table><tr><td>Minimo:</td><td><label>'+data['MinValue'].toFixed(2)+ '</label></td></tr><tr><td>Medio:</td><td><label>'+data['MeanValue'].toFixed(2) +'</label></td></tr><tr><td>Maximo:</td><td><label>'+data['MaxValue'].toFixed(2) +'</label></td></tr></table></div></td></tr><tr><td><div class="DetailChart"></div></td></tr><tr><td colspan=2 align=center> <label class=DetailLabel>Limites máximos establecidos por la OMS</label></td></tr><tr><td colspan=2><div id=ChartLines>000</div></td></tr><tr><td><select name=long onchange=ShowDetail('+idstation+','+idsensor+',this.value)><option value="20" '+(long==20?'selected':'')+'>20 puntos</option><option value="10" '+(long==10?'selected':'')+'>10 puntos</option></select> <div id=limites><label>Limite: '+data['LMR']+' - '+data['LMP']+'</label> <i class="fa fa-cog" aria-hidden="true"></i></div></td></tr></table>');
+           $(".DetailParameter").append('<div class="DetailAlert"><table border=0 cellpadding=0 cellspacing=0><tr><td rowspan=3 width=55><div class=PanelAlerta style="font-size:30px"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></div></td><td align=center width=180 colspan=2 style="font-size:11px;font-weight:bold;text-transform:uppercase;">'+data['nameStation']+'</td></tr><tr><td colspan=2 align=center style="font-size:20px;font-weight:bold;text-transform:uppercase;">'+data['Name']+ '</td></tr><tr><td align=center>' +data['codenameStation']+'</td><td align=center>' +data['CodeName']+'</td></tr></table></div>');
+           $(".DetailParameter").append('<table align=center border=0><tr><td align=center><div id=Chart></div></td><td rowspan=2  align=center><div class="DetailValue"><table><tr><td>Minimo:</td><td><label>'+data['MinValue'].toFixed(2)+ '</label></td></tr><tr><td>Medio:</td><td><label>'+data['MeanValue'].toFixed(2) +'</label></td></tr><tr><td>Maximo:</td><td><label>'+data['MaxValue'].toFixed(2) +'</label></td></tr></table></div></td></tr><tr><td><div class="DetailChart"></div></td></tr><tr><td colspan=2 align=center> <label class=DetailLabel>Limites máximos establecidos por la OMS</label></td></tr><tr><td colspan=2><div id=ChartLines>000</div></td></tr><tr><td align=right><select name=long onchange=ShowDetail('+idstation+','+idsensor+',this.value)><option value="20" '+(long==20?'selected':'')+'>20 puntos</option><option value="10" '+(long==10?'selected':'')+'>10 puntos</option></select></td><td> <div id=limites><label>Limite: '+data['LMR']+' - '+data['LMP']+'</label> <i class="fa fa-cog" aria-hidden="true"></i></div></td></tr></table>');
            
             n=((data['Last']['Value']*100)/data['MP']);
        
