@@ -21,7 +21,7 @@
 			{% if info.numRisk == 0 %}
 			<img src="{{ asset('public/img/reportImg/reporte-w-gerente1.jpg')}}" id="img-info">
 			{% else %}
-			<img src="{{ asset('public/img/reportImg/reporte-w-gerente2.jpg')}}" id="img-info">
+			<img src="{{ absolute_url(asset('public/img/reportImg/reporte-w-gerente2.jpg'))}}" id="img-info">
 			{% endif %} 
 		{% else %}   	
 			<img src="{{ asset('public/img/reportImg/reporte-w-gerente3.jpg')}}" id="img-info">
@@ -30,7 +30,7 @@
 		<br>
 		<div class="col-md-6">
 			<p id="titulo-fechas">Fecha de inicio de reporte de monitoreo:<br>
-			<h2 id="fechas" style="color:#1d59bf;"><img src="{{ asset('public/img/reportImg/calend.jpg') }}"> {{ info.from|date('F jS \\o\\f Y')}} <img src="{{ asset('public/img/reportImg/reloj.jpg') }}">{{info.from|date('g:ia')}}</h2>
+			<h2 id="fechas" style="color:#1d59bf;"><img src="{{ absolute_url(asset('public/img/reportImg/calend.jpg')) }}"> {{ info.from|date('F jS \\o\\f Y')}} <img src="{{ absolute_url(asset('public/img/reportImg/reloj.jpg')) }}">{{info.from|date('g:ia')}}</h2>
 			</p>
 			<br>
 			<p id="titulo-fechas">Fecha final de reporte de monitoreo:<br>

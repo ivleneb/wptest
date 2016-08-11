@@ -25,7 +25,7 @@
 			//query code and scheduled in database/table of schedules
 			$Schedule = $this->getDoctrine()->getRepository('AppBundle:ScheduledReports')->findOneBy(array('idScheduledReport'=>$codeSchedule, 'schedule' => $schedule, 'active' => 1));
 
-			$mm = $this->get('app.mailer');
+			//$mm = $this->get('app.mailer');
 
 			//Validate then send email or report error to admin
 			if ($Schedule) 
@@ -76,14 +76,31 @@
 				# Call mailer service to generate and send email
 				//return new Response( $mm->sendEmail($user->getEmail(), $data, "Reporte Semanal", "wr".$Schedule->getTemplate()));
 
-				$mm->sendEmail($user->getEmail(), $data, "Reporte Semanal", $Schedule->getTemplate());
+				//$mm = $this->get('app.mailer');
+				//$mm->sendEmail($user->getEmail(), $data, "Reporte Semanal", $Schedule->getTemplate());
+
+				$message = \Swift_Message::newInstance()
+		        ->setSubject("Reporte Semanal")
+		        ->setFrom('juan.basilio@waposat.com')
+		        ->setTo($user->getEmail())
+		        ->setBody(
+		            $this->renderView(
+		                'Email/'.$Schedule->getTemplate().'.html.twig',
+		                array('info' => $data)
+		            ),
+		            'text/html'
+		        )
+		    ;
+		    
+		    $this->get('mailer')->send($message);
+
 		    	return new Response('<html><body>Email to '.$user->getEmail().' sent!</body></html>', Response::HTTP_OK);
 
 			} else 
 			{
 
 				# Email Report to admin
-
+				$mm = $this->get('app.mailer');
 				$mm->sendEmail();
 
 				return new Response('<html><body>Email FAIL to send!</body></html>', Response::HTTP_OK);
