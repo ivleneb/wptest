@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" type="text/css" href="{{ asset('public/css/reportStyles/bootstrap.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ absolute_url(asset('public/css/reportStyles/bootstrap.css')) }}">
 {% endblock %}
 
 {% block body %}
@@ -19,12 +19,12 @@
 		<div class="col-md-4">
 		{% if info.numDanger == 0 %}
 			{% if info.numRisk == 0 %}
-			<img src="{{ asset('public/img/reportImg/reporte-w-gerente1.jpg')}}" id="img-info">
+			<img src="{{ absolute_url(asset('public/img/reportImg/reporte-w-gerente1.jpg'))}}" id="img-info">
 			{% else %}
 			<img src="{{ absolute_url(asset('public/img/reportImg/reporte-w-gerente2.jpg'))}}" id="img-info">
 			{% endif %} 
 		{% else %}   	
-			<img src="{{ asset('public/img/reportImg/reporte-w-gerente3.jpg')}}" id="img-info">
+			<img src="{{ absolute_url(asset('public/img/reportImg/reporte-w-gerente3.jpg'))}}" id="img-info">
 		{% endif %}
 		</div>
 		<br>
@@ -34,7 +34,7 @@
 			</p>
 			<br>
 			<p id="titulo-fechas">Fecha final de reporte de monitoreo:<br>
-			<h2 id="fechas" style="color:#1d59bf;"><img src="{{ asset('public/img/reportImg/calend.jpg') }}"> {{info.to|date('F jS \\o\\f Y')}} <img src="{{ asset('public/img/reportImg/reloj.jpg') }}">{{info.to|date('g:ia')}}</h2>
+			<h2 id="fechas" style="color:#1d59bf;"><img src="{{ absolute_url(asset('public/img/reportImg/calend.jpg')) }}"> {{info.to|date('F jS \\o\\f Y')}} <img src="{{ absolute_url(asset('public/img/reportImg/reloj.jpg')) }}">{{info.to|date('g:ia')}}</h2>
 			</p>
 			<br><br>
 			<p>A fecha <b style="color:#1d59bf;">{{info.to|date('F jS \\a\\t g:ia')}}</b> los puntos de monitoreo registrados
@@ -133,7 +133,7 @@
 	<div class="container">
 		<div class="col-md-10">
 		<hr class="hr-inicio">
-			<p class="parrafo-final"><img src="{{ asset('public/img/reportImg/img4.png') }}" class="img-final">:Si no va a reciclar, no imprima este e-mail. Y si lo va a imprimir, use ambos lados. ¡Gracias!</p>
+			<p class="parrafo-final"><img src="{{ absolute_url(asset('public/img/reportImg/img4.png')) }}" class="img-final">:Si no va a reciclar, no imprima este e-mail. Y si lo va a imprimir, use ambos lados. ¡Gracias!</p>
 		<hr class="hr-final">
 			<p class="parrafo-final2">El contenido del presente mensaje es de carácter confidencial, la información esrelevante y de exclusivo interés para su destinatario. En caso lo haya recibido por error deberá abstenerse de usarlo, reproducirlo o dinfudirlo en forma parcial o total; mucho agradecemos eliminarlo y notificarlo al remitente y/o a <u style="color:blue;"><a href="">reporte@waposat.com</a></u>.</p>
 			
