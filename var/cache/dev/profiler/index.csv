@@ -7,3 +7,4 @@ fa0cac,127.0.0.1,GET,http://localhost:8000/mailing/1/ssa,1470927202,,500
 888729,127.0.0.1,GET,http://localhost:8000/mailing/1/ssa,1470927542,,200
 03ad0e,127.0.0.1,GET,http://localhost:8000/mailing/1/ssa,1470929617,,200
 fff08e,127.0.0.1,GET,http://localhost:8000/mailing/1/sch,1470929627,,200
+67aaca,127.0.0.1,GET,http://localhost:8000/mailing/1/sch,1470935645,,200
