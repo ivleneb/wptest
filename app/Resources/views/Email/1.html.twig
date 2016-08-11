@@ -5,7 +5,58 @@
 {% endblock %}
 
 {% block stylesheets %}
+<<<<<<< HEAD
     <link href="{{ absolute_url(asset('public/css/reportStyles/bootstrap.css')) }}" rel="stylesheet">
+=======
+    <link href="{{ absolute_url(asset('public/css/reportStyles/bootstrap.css')) }}" rel="stylesheet" type="text/css">
+    <style type="text/css">
+		.container {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+#fechas{
+  border: 2.5px solid #c0c0c0;
+  font-size: 2.5em;
+}
+
+#titulo-fechas{
+  font-size: 1em;
+  padding-left: 25px;
+}
+.hr-inicio{
+    border: 1px solid #c0c0c0;
+    margin-bottom: 10px;
+}
+
+.hr-final{
+    border: 1px solid #c0c0c0;
+    margin-top: 10px;
+}
+
+.img-final{
+  height: 30px;
+  width: 30px;
+}
+
+.parrafo-final{
+  color: green;
+  font-size: 13px;
+}
+
+.parrafo-final2{
+  color:#960303 ;
+  font-size: 13px;
+}
+
+p{
+  font-style: sans-serif;
+  font-size: 16px;
+}
+
+    </style>
+>>>>>>> 2536d7fe16e50aa6707a345573f7c6e453dc994a
 {% endblock %}
 
 {% block body %}
