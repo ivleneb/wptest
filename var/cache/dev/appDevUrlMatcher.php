@@ -222,6 +222,11 @@ class appDevUrlMatcher extends Symfony\Bundle\FrameworkBundle\Routing\Redirectab
 
             }
 
+            // DataStatistics
+            if (0 === strpos($pathinfo, '/dashboard/statistics') && preg_match('#^/dashboard/statistics/(?P<date1>[^/]++)/(?P<date2>[^/]++)$#s', $pathinfo, $matches)) {
+                return $this->mergeDefaults(array_replace($matches, array('_route' => 'DataStatistics')), array (  '_controller' => 'AppBundle\\Controller\\PlatformController::DateStatistics',));
+            }
+
         }
 
         // app_security_login
