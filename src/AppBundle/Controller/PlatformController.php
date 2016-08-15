@@ -187,7 +187,14 @@
 
 			$Station = $lD->SensorDataAction($idSensor, $idStation);
 
-    		return new Response(json_encode($Station));
+			$encoders = array(new JsonEncoder());
+			$normalizers = array(new ObjectNormalizer());
+
+			$serializer = new Serializer($normalizers, $encoders);
+
+			$jsonContent = $serializer->serialize($Station, 'json');
+
+    		return new Response($jsonContent /*json_encode($Station)*/);
 			
 		}
 
@@ -256,6 +263,22 @@
 			
 		}
 
+		/**
+		 * @Route("/dashboard/statistics/{date1}/{date2}", name="DataStatistics")
+		 */
+		public function DateStatistics()
+		{
+			if (!$this->get('security.authorization_checker')->isGranted()) 
+			{
+				throw $this->createAccessDeniedException();
+			}
+			$user = $this->getUser();
+
+			$lD = $this->get('app.dataloader');
+			$lD->setupUser($user);
+			
+
+		}
 	}
 
  ?>
