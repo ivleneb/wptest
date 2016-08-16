@@ -1380,247 +1380,6 @@ return $ret;
 }
 }
 }
-namespace Monolog\Formatter
-{
-interface FormatterInterface
-{
-public function format(array $record);
-public function formatBatch(array $records);
-}
-}
-namespace Monolog\Formatter
-{
-use Exception;
-class NormalizerFormatter implements FormatterInterface
-{
-const SIMPLE_DATE ="Y-m-d H:i:s";
-protected $dateFormat;
-public function __construct($dateFormat = null)
-{
-$this->dateFormat = $dateFormat ?: static::SIMPLE_DATE;
-if (!function_exists('json_encode')) {
-throw new \RuntimeException('PHP\'s json extension is required to use Monolog\'s NormalizerFormatter');
-}
-}
-public function format(array $record)
-{
-return $this->normalize($record);
-}
-public function formatBatch(array $records)
-{
-foreach ($records as $key => $record) {
-$records[$key] = $this->format($record);
-}
-return $records;
-}
-protected function normalize($data)
-{
-if (null === $data || is_scalar($data)) {
-if (is_float($data)) {
-if (is_infinite($data)) {
-return ($data > 0 ?'':'-') .'INF';
-}
-if (is_nan($data)) {
-return'NaN';
-}
-}
-return $data;
-}
-if (is_array($data) || $data instanceof \Traversable) {
-$normalized = array();
-$count = 1;
-foreach ($data as $key => $value) {
-if ($count++ >= 1000) {
-$normalized['...'] ='Over 1000 items, aborting normalization';
-break;
-}
-$normalized[$key] = $this->normalize($value);
-}
-return $normalized;
-}
-if ($data instanceof \DateTime) {
-return $data->format($this->dateFormat);
-}
-if (is_object($data)) {
-if ($data instanceof Exception) {
-return $this->normalizeException($data);
-}
-if (method_exists($data,'__toString') && !$data instanceof \JsonSerializable) {
-$value = (string) $data;
-} else {
-$value = $this->toJson($data, true);
-}
-return sprintf("[object] (%s: %s)", get_class($data), $value);
-}
-if (is_resource($data)) {
-return sprintf('[resource] (%s)', get_resource_type($data));
-}
-return'[unknown('.gettype($data).')]';
-}
-protected function normalizeException(Exception $e)
-{
-$data = array('class'=> get_class($e),'message'=> $e->getMessage(),'code'=> $e->getCode(),'file'=> $e->getFile().':'.$e->getLine(),
-);
-$trace = $e->getTrace();
-foreach ($trace as $frame) {
-if (isset($frame['file'])) {
-$data['trace'][] = $frame['file'].':'.$frame['line'];
-} else {
-$data['trace'][] = $this->toJson($this->normalize($frame), true);
-}
-}
-if ($previous = $e->getPrevious()) {
-$data['previous'] = $this->normalizeException($previous);
-}
-return $data;
-}
-protected function toJson($data, $ignoreErrors = false)
-{
-if ($ignoreErrors) {
-if (version_compare(PHP_VERSION,'5.4.0','>=')) {
-return @json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-}
-return @json_encode($data);
-}
-if (version_compare(PHP_VERSION,'5.4.0','>=')) {
-$json = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-} else {
-$json = json_encode($data);
-}
-if ($json === false) {
-$this->throwEncodeError(json_last_error(), $data);
-}
-return $json;
-}
-private function throwEncodeError($code, $data)
-{
-switch ($code) {
-case JSON_ERROR_DEPTH:
-$msg ='Maximum stack depth exceeded';
-break;
-case JSON_ERROR_STATE_MISMATCH:
-$msg ='Underflow or the modes mismatch';
-break;
-case JSON_ERROR_CTRL_CHAR:
-$msg ='Unexpected control character found';
-break;
-case JSON_ERROR_UTF8:
-$msg ='Malformed UTF-8 characters, possibly incorrectly encoded';
-break;
-default:
-$msg ='Unknown error';
-}
-throw new \RuntimeException('JSON encoding failed: '.$msg.'. Encoding: '.var_export($data, true));
-}
-}
-}
-namespace Monolog\Formatter
-{
-use Exception;
-class LineFormatter extends NormalizerFormatter
-{
-const SIMPLE_FORMAT ="[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n";
-protected $format;
-protected $allowInlineLineBreaks;
-protected $ignoreEmptyContextAndExtra;
-protected $includeStacktraces;
-public function __construct($format = null, $dateFormat = null, $allowInlineLineBreaks = false, $ignoreEmptyContextAndExtra = false)
-{
-$this->format = $format ?: static::SIMPLE_FORMAT;
-$this->allowInlineLineBreaks = $allowInlineLineBreaks;
-$this->ignoreEmptyContextAndExtra = $ignoreEmptyContextAndExtra;
-parent::__construct($dateFormat);
-}
-public function includeStacktraces($include = true)
-{
-$this->includeStacktraces = $include;
-if ($this->includeStacktraces) {
-$this->allowInlineLineBreaks = true;
-}
-}
-public function allowInlineLineBreaks($allow = true)
-{
-$this->allowInlineLineBreaks = $allow;
-}
-public function ignoreEmptyContextAndExtra($ignore = true)
-{
-$this->ignoreEmptyContextAndExtra = $ignore;
-}
-public function format(array $record)
-{
-$vars = parent::format($record);
-$output = $this->format;
-foreach ($vars['extra'] as $var => $val) {
-if (false !== strpos($output,'%extra.'.$var.'%')) {
-$output = str_replace('%extra.'.$var.'%', $this->stringify($val), $output);
-unset($vars['extra'][$var]);
-}
-}
-if ($this->ignoreEmptyContextAndExtra) {
-if (empty($vars['context'])) {
-unset($vars['context']);
-$output = str_replace('%context%','', $output);
-}
-if (empty($vars['extra'])) {
-unset($vars['extra']);
-$output = str_replace('%extra%','', $output);
-}
-}
-foreach ($vars as $var => $val) {
-if (false !== strpos($output,'%'.$var.'%')) {
-$output = str_replace('%'.$var.'%', $this->stringify($val), $output);
-}
-}
-return $output;
-}
-public function formatBatch(array $records)
-{
-$message ='';
-foreach ($records as $record) {
-$message .= $this->format($record);
-}
-return $message;
-}
-public function stringify($value)
-{
-return $this->replaceNewlines($this->convertToString($value));
-}
-protected function normalizeException(Exception $e)
-{
-$previousText ='';
-if ($previous = $e->getPrevious()) {
-do {
-$previousText .=', '.get_class($previous).'(code: '.$previous->getCode().'): '.$previous->getMessage().' at '.$previous->getFile().':'.$previous->getLine();
-} while ($previous = $previous->getPrevious());
-}
-$str ='[object] ('.get_class($e).'(code: '.$e->getCode().'): '.$e->getMessage().' at '.$e->getFile().':'.$e->getLine().$previousText.')';
-if ($this->includeStacktraces) {
-$str .="\n[stacktrace]\n".$e->getTraceAsString();
-}
-return $str;
-}
-protected function convertToString($data)
-{
-if (null === $data || is_bool($data)) {
-return var_export($data, true);
-}
-if (is_scalar($data)) {
-return (string) $data;
-}
-if (version_compare(PHP_VERSION,'5.4.0','>=')) {
-return $this->toJson($data, true);
-}
-return str_replace('\\/','/', @json_encode($data));
-}
-protected function replaceNewlines($str)
-{
-if ($this->allowInlineLineBreaks) {
-return $str;
-}
-return str_replace(array("\r\n","\r","\n"),' ', $str);
-}
-}
-}
 namespace Monolog\Handler
 {
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
@@ -1779,104 +1538,6 @@ $filtered[] = $record;
 }
 }
 $this->handler->handleBatch($filtered);
-}
-}
-}
-namespace Monolog\Handler
-{
-class TestHandler extends AbstractProcessingHandler
-{
-protected $records = array();
-protected $recordsByLevel = array();
-public function getRecords()
-{
-return $this->records;
-}
-protected function hasRecordRecords($level)
-{
-return isset($this->recordsByLevel[$level]);
-}
-protected function hasRecord($record, $level)
-{
-if (is_array($record)) {
-$record = $record['message'];
-}
-return $this->hasRecordThatPasses(function ($rec) use ($record) {
-return $rec['message'] === $record;
-}, $level);
-}
-public function hasRecordThatContains($message, $level)
-{
-return $this->hasRecordThatPasses(function ($rec) use ($message) {
-return strpos($rec['message'], $message) !== false;
-}, $level);
-}
-public function hasRecordThatMatches($regex, $level)
-{
-return $this->hasRecordThatPasses(function ($rec) use ($regex) {
-return preg_match($regex, $rec['message']) > 0;
-}, $level);
-}
-public function hasRecordThatPasses($predicate, $level)
-{
-if (!is_callable($predicate)) {
-throw new \InvalidArgumentException("Expected a callable for hasRecordThatSucceeds");
-}
-if (!isset($this->recordsByLevel[$level])) {
-return false;
-}
-foreach ($this->recordsByLevel[$level] as $i => $rec) {
-if (call_user_func($predicate, $rec, $i)) {
-return true;
-}
-}
-return false;
-}
-protected function write(array $record)
-{
-$this->recordsByLevel[$record['level']][] = $record;
-$this->records[] = $record;
-}
-public function __call($method, $args)
-{
-if (preg_match('/(.*)(Debug|Info|Notice|Warning|Error|Critical|Alert|Emergency)(.*)/', $method, $matches) > 0) {
-$genericMethod = $matches[1] .'Record'. $matches[3];
-$level = constant('Monolog\Logger::'. strtoupper($matches[2]));
-if (method_exists($this, $genericMethod)) {
-$args[] = $level;
-return call_user_func_array(array($this, $genericMethod), $args);
-}
-}
-throw new \BadMethodCallException('Call to undefined method '. get_class($this) .'::'. $method .'()');
-}
-}
-}
-namespace Symfony\Bridge\Monolog\Handler
-{
-use Monolog\Logger;
-use Monolog\Handler\TestHandler;
-use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
-class DebugHandler extends TestHandler implements DebugLoggerInterface
-{
-public function getLogs()
-{
-$records = array();
-foreach ($this->records as $record) {
-$records[] = array('timestamp'=> $record['datetime']->getTimestamp(),'message'=> $record['message'],'priority'=> $record['level'],'priorityName'=> $record['level_name'],'context'=> $record['context'],'channel'=> isset($record['channel']) ? $record['channel'] :'',
-);
-}
-return $records;
-}
-public function countErrors()
-{
-$cnt = 0;
-$levels = array(Logger::ERROR, Logger::CRITICAL, Logger::ALERT, Logger::EMERGENCY);
-foreach ($levels as $level) {
-if (isset($this->recordsByLevel[$level])) {
-$cnt += count($this->recordsByLevel[$level]);
-}
-}
-return $cnt;
 }
 }
 }
@@ -2065,6 +1726,50 @@ namespace Doctrine\Common
 use Doctrine\Common\Lexer\AbstractLexer;
 abstract class Lexer extends AbstractLexer
 {
+}
+}
+namespace Doctrine\Common\Persistence
+{
+interface Proxy
+{
+const MARKER ='__CG__';
+const MARKER_LENGTH = 6;
+public function __load();
+public function __isInitialized();
+}
+}
+namespace Doctrine\Common\Util
+{
+use Doctrine\Common\Persistence\Proxy;
+class ClassUtils
+{
+public static function getRealClass($class)
+{
+if (false === $pos = strrpos($class,'\\'.Proxy::MARKER.'\\')) {
+return $class;
+}
+return substr($class, $pos + Proxy::MARKER_LENGTH + 2);
+}
+public static function getClass($object)
+{
+return self::getRealClass(get_class($object));
+}
+public static function getParentClass($className)
+{
+return get_parent_class( self::getRealClass( $className ) );
+}
+public static function newReflectionClass($class)
+{
+return new \ReflectionClass( self::getRealClass( $class ) );
+}
+public static function newReflectionObject($object)
+{
+return self::newReflectionClass( self::getClass( $object ) );
+}
+public static function generateProxyClassName($className, $proxyNamespace)
+{
+return rtrim($proxyNamespace,'\\') .'\\'.Proxy::MARKER.'\\'. ltrim($className,'\\');
+}
 }
 }
 namespace Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter
