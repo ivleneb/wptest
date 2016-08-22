@@ -297,7 +297,6 @@ width: 231px;
  font-size: 11px;
  color: #FFFFFF;
  text-align: left;
- cursor: pointer;
  white-space: nowrap;
  word-wrap: normal;
  }
@@ -539,8 +538,14 @@ div .next:hover {background-color: rgba(68,68,68,1)}
 .boxcols{border: solid 0px #0000FF;}
 .Group{border: solid 0px #0000FF;}
 
-.box{display:inline-block;border: solid 0px #ff0000;text-align: center;padding-bottom: 10px;}
+
+.box{display:inline-block;border: solid 0px #ff0000;text-align: center;padding-bottom: 10px; cursor: pointer;}
+.box:hover {opacity: 0.5;
+    filter: alpha(opacity=50); /* For IE8 and earlier */}
+
+
 .ItemBox{display:inline-block;border: solid 0px #ff0000;text-align: center;padding-bottom: 10px;}
+
 
 .TablaPanel{width: 100%;border-spacing: 0;border-collapse: collapse;}
 .TablaPoint{width: 100%;border-spacing: 0;border-collapse: collapse;}

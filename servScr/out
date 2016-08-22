@@ -1,4 +1,4 @@
 #!/bin/bash
 
-curl -o /var/www/html/waposatdev/wptest/servScr/temp "http://monitoreo.waposat.com/monitor/abc|123|4|18.43|10|79.07|7|92.79|5|95.26|4|48.10|2|75.73|11|65.92|11|22.17|13|37.87|11|90.76monitor/def|123|13|37.76|13|4.54|3|94.72|14|76.33|13|62.80|7|7.18|14|21.91|7|10.76|9|94.00"
-curl -o /var/www/html/waposatdev/wptest/servScr/temp "http://monitoreo.waposat.com/monitor/def|123|13|37.76|13|4.54|3|94.72|14|76.33|13|62.80|7|7.18|14|21.91|7|10.76|9|94.00"
+curl -o /var/www/html/waposatdev/wptest/servScr/temp "http://monitoreo.waposat.com/monitor/abc|123|9|3.46|9|74.62|11|22.80"
+curl -o /var/www/html/waposatdev/wptest/servScr/temp "http://monitoreo.waposat.com/monitor/def|123|10|31.97|14|7.17|4|52.43"
