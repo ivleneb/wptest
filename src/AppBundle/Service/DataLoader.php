@@ -222,7 +222,7 @@
 		}	
 
 
-		private function eventReport($date_1, $date_2)
+		public function eventReport()
 		{
 			$em = $this->entityManager;
 			$dql = "SELECT a FROM AppBundle:NotificationsAlert a JOIN a.idMonitoringEvent e JOIN e.idMeasurement m WHERE a.idUser = ".$this->id_user." AND m.date BETWEEN '".$this->useDateInterval['date1']->format('Y-m-d H:i:s')."' AND '".$this->useDateInterval['date2']->format('Y-m-d H:i:s')."'";
@@ -231,18 +231,15 @@
 
 			$alerts = array();
 
-			if ($update) 
-			{
-				$dangerA = array();
-				$riskA = array();
-				$longDanger = $longRisk = 0;
-			}
-			
+			$dangerA = array();
+			$riskA = array();
+			$longDanger = $longRisk = 0;
+		
 			foreach ($notifier as $n) 
 			{
 				$station = $n->getIdMonitoringEvent()->getIdBlockSensor()->getIdBlock();
 				$sensor = $n->getIdMonitoringEvent()->getIdBlockSensor()->getIdSensor();
-				$idEvent = $n->getIdMonitoringEvent->getIdMonitoringEvent();
+				$idEvent = $n->getIdMonitoringEvent()->getIdMonitoringEvent();
 				$eventDate = $n->getIdMonitoringEvent()->getIdMeasurement()->getDate()->format('M-d H:i:s');
 				$eventType = $n->getIdMonitoringEvent()->getIdEventType()->getAlertType();
 				$eventName = $n->getIdMonitoringEvent()->getIdEventType()->getEventName();
@@ -251,9 +248,7 @@
 				$query = $em->createQuery($dql);
 				$process = $query->getResult();
 
-				if ($update) 
-				{
-					if ($eventType == 'danger')
+				if ($eventType == 'danger')
 					{
 						$longDanger++;
 						$dangerA[] = array("id"=>$idEvent, "idProcessBlock"=>$process[0]->getId(), "ProcessBlock"=>$process[0]->getBlockCodename(), "idStationBlock"=>$station->getId(), "StationBlock"=>$station->getBlockCodename(), "idSensor"=>$sensor->getIdSensor(), "Sensor"=>$sensor->getCodename(), "Message"=>$eventName, "Date"=>$eventDate);
@@ -262,28 +257,10 @@
 						$longRisk++;
 						$riskA[] = array("id"=>$idEvent, "idProcessBlock"=>$process[0]->getId(), "ProcessBlock"=>$process[0]->getBlockCodename(), "idStationBlock"=>$station->getId(), "StationBlock"=>$station->getBlockCodename(), "idSensor"=>$sensor->getIdSensor(), "Sensor"=>$sensor->getCodename(), "Message"=>$eventName, "Date"=>$eventDate);
 					}
-				} else 
-				{
-					if ($eventType == 'danger') 
-					{
-						$eventNum = 1;	
-					} else if ($eventType == 'risk') 
-					{
-						$eventNum = 0;	
-					}
-					
-
-					$alerts[] = array("idProcessBlock"=>$process[0]->getId(), "idStationBlock"=>$station->getId(), "idNotification"=>$n->getIdNotificationAlert(), "Message"=>$process[0]->getBlockName()." problemas en estacion: ".$station->getBlockCodeName().", sensor: ".$sensor->getCodename(), "Date"=>$eventDate, "AlertType"=>$eventNum);
-				}
 			}
-
-			if ($update) 
-			{
-				return array("LongDanger"=>$longDanger, "LongRisk"=>$longRisk, "Danger"=>$dangerA, "Risk"=>$riskA);	
-			} else 
-			{
-				return array("Long"=>count($notifier), "Alert"=>$alerts);
-			}
+			
+			return array("LongDanger"=>$longDanger, "LongRisk"=>$longRisk, "Danger"=>$dangerA, "Risk"=>$riskA);	
+			
 			
 		}
 

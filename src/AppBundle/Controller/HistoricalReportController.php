@@ -3,14 +3,15 @@
 	namespace AppBundle\Controller;
 	use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 	use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+	use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 	use Symfony\Component\HttpFoundation\Response;
 	use Symfony\Component\HttpFoundation\Request;
-	use Symfony\Component\Form\Extension\Core\Type\TextType;
-	use Symfony\Component\Form\Extension\Core\Type\DateType;
 	use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 	use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-	use Symfony\Component\Form\Extension\Core\Type\EmailType;
-	use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+	use Symfony\Component\Serializer\Encoder\JsonEncoder;
+	//use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
+	use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+	use Symfony\Component\Serializer\Serializer;
 
 	/**
 	* 
@@ -29,17 +30,46 @@
     		}
     		$user = $this->getUser();
 
-    		$parameters = $request->request->all();
+    		$request = Request::createFromGlobals();
 
-    		$date1 = date_create_from_format('d-M-Y H:i:s', $parameters['date1']);
-			$date1->getTimestamp();
-    		$date2 = date_create_from_format('d-M-Y H:i:s', $parameters['date2']);
-			$date2->getTimestamp();;
+    		$keys = $request->request->keys();
+    		$content = $request->getContent();
+    		$date1 = $request->request->get('date1');
+    		$date2 = $request->request->get('date2');
+    		$data = $request->request->all();
+
+    		$arr = array($content, $keys, $date1, $date2, $data);
+
+    		$encoders = array(new JsonEncoder());
+			$normalizers = array(new ObjectNormalizer());
+
+			$serializer = new Serializer($normalizers, $encoders);
+
+			$jsonContent = $serializer->serialize($arr, 'json');
+
+			//return new Response($jsonContent);
+
+			/*$d1 = strtotime($date1);
+			$d2 = strtotime($date2);*/
+    		$d1 = \DateTime::createFromFormat('Y-m-d H:i:s', $date1 /*$parameters['date1']*/);
+    		if(!$d1)
+    		{
+				return new Response($jsonContent);
+				//return new Response(json_encode($date1));
+    		}
+			$d1->getTimestamp();
+    		$d2 = date_create_from_format('Y-m-d H:i:s', $date2 /*$parameters['date2']*/);
+			//$d2->getTimestamp();
+			if(!$d2)
+    		{
+				return new Response($jsonContent);
+				//eturn new Response(json_encode($date1));
+    		}
 			
     		$lD = $this->get('app.dataloader');
 	    	$lD->setupUser($user);
-	    	$lD->retrieveSensorData(1, 1, 0, 0, 1, 0, array('date1'=>$date1, 'date2'=>$date2));
-			$Station = $lD->AlertDataAction(1);
+	    	$lD->retrieveSensorData(1, 1, 0, 0, 1, 0, array('date1'=>$d1, 'date2'=>$d2));
+			$Station = $lD->eventReport();
 
     		return new Response(json_encode($Station));
 		}

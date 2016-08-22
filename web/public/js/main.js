@@ -469,7 +469,7 @@ function showparameter(idstation=1,idsensor=1,long=20){
 
 function CloseSession(){
     
-  if (confirm("Cerrar Sesi\u00F3n")) {
+  if (confirm("Cerrar Sesi\u00F3n$request = Request::createFromGlobals();")) {
 
     window.location.assign("http://monitoreo.waposat.com/logout");
   } 
@@ -584,10 +584,6 @@ function UpdateCurveTypes(datos){
 }
 
 
-
-
-
-
 function Export(){
 
   var cadena = "";
@@ -600,17 +596,35 @@ function Export(){
 
 var dataProbe;
 
+
 function chargeValuesDate(){
 
   $parametros = {
     'date1' : document.getElementById("Date1").value+" 00:00:00",
     'date2' : document.getElementById("Date2").value+" 23:59:59",
   };
+  $url = "history/events";
+  $.ajax({
+    type: "POST",
+    url: $url,
+    data: $parametros,
+    dataType : "json",
+    success: function(data){
+      dataProbe = data;
+    }
+  });
 
-  $.post('history/events', $parametros, function(response) {
+
+  /*var parametros = {
+    'date1' : document.getElementById("Date1").value+" 00:00:00",
+    'date2' : document.getElementById("Date2").value+" 23:59:59",
+  };
+  console.log(parametros.date1);
+  console.log(parametros.date2);
+  $.post('history/events', parametros, function(response) {
     dataProbe = response;
   }, 'json');
-
+*/
 }
 
 
