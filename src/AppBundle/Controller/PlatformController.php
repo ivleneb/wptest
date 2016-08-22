@@ -257,28 +257,12 @@
 			
 			$lD = $this->get('app.dataloader');
 			$lD->setupUser($user);
-			$Station = $lD->AlertDataAction(1/*, $idUser*/);
+			$Station = $lD->AlertDataAction(1);
 
     		return new Response(json_encode($Station));
 			
 		}
 
-		/**
-		 * @Route("/dashboard/statistics/{date1}/{date2}", name="DataStatistics")
-		 */
-		public function DateStatistics()
-		{
-			if (!$this->get('security.authorization_checker')->isGranted()) 
-			{
-				throw $this->createAccessDeniedException();
-			}
-			$user = $this->getUser();
-
-			$lD = $this->get('app.dataloader');
-			$lD->setupUser($user);
-			
-
-		}
 	}
 
  ?>

@@ -6,9 +6,6 @@
 	use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 	use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 	use Symfony\Component\HttpFoundation\Response;
-	use Symfony\Component\Serializer\Serializer;
-	use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-	use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 	/**
 	* 
@@ -25,7 +22,7 @@
 			//query code and scheduled in database/table of schedules
 			$Schedule = $this->getDoctrine()->getRepository('AppBundle:ScheduledReports')->findOneBy(array('idScheduledReport'=>$codeSchedule, 'schedule' => $schedule, 'active' => 1));
 
-			//$mm = $this->get('app.mailer');
+			$mm = $this->get('app.mailer');
 
 			//Validate then send email or report error to admin
 			if ($Schedule) 
@@ -40,8 +37,6 @@
 				$lD = $this->get('app.dataloader');
 				$stations = $lD->getBlocks($user->getId(), 3);
 
-				$dataEvent = array();
-				$info = array();
 				$risk = $danger = 0;
 
 				foreach ($stations as $station) 
@@ -63,36 +58,7 @@
 
 				$data = array("user"=>$user, "from"=>$time2, "to"=>$time, "numDanger"=>$danger, "numRisk"=>$risk, "stationsEvents"=>$EventsPerStation);
 
-				/*$encoders = array(new JsonEncoder());
-				$normalizers = array(new ObjectNormalizer());
-
-				$serializer = new Serializer($normalizers, $encoders);
-
-				$jsonContent = $serializer->serialize($data, 'json');
-
-
-				return new Response($jsonContent);*/
-
-				# Call mailer service to generate and send email
-				//return new Response( $mm->sendEmail($user->getEmail(), $data, "Reporte Semanal", "wr".$Schedule->getTemplate()));
-
-				//$mm = $this->get('app.mailer');
-				//$mm->sendEmail($user->getEmail(), $data, "Reporte Semanal", $Schedule->getTemplate());
-
-				$message = \Swift_Message::newInstance()
-		        ->setSubject("Reporte Semanal")
-		        ->setFrom('juan.basilio@waposat.com')
-		        ->setTo($user->getEmail())
-		        ->setBody(
-		            $this->renderView(
-		                'Email/'.$Schedule->getTemplate().'.html.twig',
-		                array('info' => $data)
-		            ),
-		            'text/html'
-		        )
-		    ;
-		    
-		    $this->get('mailer')->send($message);
+				$mm->sendEmail($data, $user->getEmail(),"Reporte Semanal", $Schedule->getTemplate());
 
 		    	return new Response('<html><body>Email to '.$user->getEmail().' sent!</body></html>', Response::HTTP_OK);
 
@@ -100,7 +66,6 @@
 			{
 
 				# Email Report to admin
-				$mm = $this->get('app.mailer');
 				$mm->sendEmail("Someone(what) is trying to send an email report with Schedule Id:".$codeSchedule.", and Schedule:".$schedule.". Please check this Schedule.");
 
 				return new Response('<html><body>Email FAIL to send!</body></html>', Response::HTTP_OK);

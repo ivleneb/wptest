@@ -18,6 +18,7 @@
 		private $requiredSensors = 4;
 		private $loadStationData = 0, $loadProcessData = 0, $loadSensorData = 0;
 		private $basic_stat=0, $basic_info=0, $limits=0, $long=0, $addData=0, $uselastId=0;
+		private $useDateInterval = null;
 
 		public function __construct(EntityManager $entityManager)
 		{
@@ -32,7 +33,7 @@
 		}
 
 		//public function retrieveSensorData($basic_info=1, $limits=1, $measurements=1, $basic_stat=1, $long=1, $uselastId=0, $useDates)
-		public function retrieveSensorData($basic_info=1, $basic_stat=1, $limits=1, $long=1, $addData=1, $uselastId =0)
+		public function retrieveSensorData($basic_info=1, $basic_stat=1, $limits=1, $long=1, $addData=1, $uselastId =0, array $useDateInterval = null)
 		{
 			$this->loadSensorData = 1;
 			$this->basic_info = $basic_info;
@@ -41,6 +42,7 @@
 			$this->long = $long;
 			$this->addData = $addData;
 			$this->uselastId = $uselastId;
+			$this->useDateInterval = $useDateInterval;
 		}
 
 		public function retrieveStationData($critical = 1 , $alert = 1, $stable = 1)
@@ -219,10 +221,11 @@
 			}
 		}	
 
-		public function AlertDataAction($update=0)
+
+		private function eventReport($date_1, $date_2)
 		{
 			$em = $this->entityManager;
-			$dql = "SELECT a FROM AppBundle:NotificationsAlert a WHERE a.idUser = ".$this->id_user." AND a.viewed = 0";
+			$dql = "SELECT a FROM AppBundle:NotificationsAlert a JOIN a.idMonitoringEvent e JOIN e.idMeasurement m WHERE a.idUser = ".$this->id_user." AND m.date BETWEEN '".$this->useDateInterval['date1']->format('Y-m-d H:i:s')."' AND '".$this->useDateInterval['date2']->format('Y-m-d H:i:s')."'";
 			$query = $em->createQuery($dql);
 			$notifier = $query->getResult();
 
@@ -239,8 +242,10 @@
 			{
 				$station = $n->getIdMonitoringEvent()->getIdBlockSensor()->getIdBlock();
 				$sensor = $n->getIdMonitoringEvent()->getIdBlockSensor()->getIdSensor();
+				$idEvent = $n->getIdMonitoringEvent->getIdMonitoringEvent();
 				$eventDate = $n->getIdMonitoringEvent()->getIdMeasurement()->getDate()->format('M-d H:i:s');
 				$eventType = $n->getIdMonitoringEvent()->getIdEventType()->getAlertType();
+				$eventName = $n->getIdMonitoringEvent()->getIdEventType()->getEventName();
 
 				$dql = "SELECT p FROM AppBundle:Blocks p WHERE p.id = ".$station->getIdParentBlock();
 				$query = $em->createQuery($dql);
@@ -251,11 +256,11 @@
 					if ($eventType == 'danger')
 					{
 						$longDanger++;
-						$dangerA[] = array("idProcessBlock"=>$process[0]->getId(), "idStationBlock"=>$station->getId(), "idSensor"=>$sensor->getIdSensor(), "Message"=>$process[0]->getBlockName()." problemas en estacion: ".$station->getBlockCodeName().", sensor: ".$sensor->getCodename(), "Date"=>$eventDate);
+						$dangerA[] = array("id"=>$idEvent, "idProcessBlock"=>$process[0]->getId(), "ProcessBlock"=>$process[0]->getBlockCodename(), "idStationBlock"=>$station->getId(), "StationBlock"=>$station->getBlockCodename(), "idSensor"=>$sensor->getIdSensor(), "Sensor"=>$sensor->getCodename(), "Message"=>$eventName, "Date"=>$eventDate);
 					} else if($eventType == 'risk')
 					{
 						$longRisk++;
-						$riskA[] = array("idProcessBlock"=>$process[0]->getId(), "idStationBlock"=>$station->getId(), "idSensor"=>$sensor->getIdSensor(), "Message"=>$process[0]->getBlockName()." problemas en estacion: ".$station->getBlockCodeName().", sensor: ".$sensor->getCodename(), "Date"=>$eventDate);
+						$riskA[] = array("id"=>$idEvent, "idProcessBlock"=>$process[0]->getId(), "ProcessBlock"=>$process[0]->getBlockCodename(), "idStationBlock"=>$station->getId(), "StationBlock"=>$station->getBlockCodename(), "idSensor"=>$sensor->getIdSensor(), "Sensor"=>$sensor->getCodename(), "Message"=>$eventName, "Date"=>$eventDate);
 					}
 				} else 
 				{
@@ -281,8 +286,72 @@
 			}
 			
 		}
+
+		public function AlertDataAction($update=0)
+		{
+			$em = $this->entityManager;
+			$dql = "SELECT a FROM AppBundle:NotificationsAlert a WHERE a.idUser = ".$this->id_user." AND a.viewed = 0";
+			$query = $em->createQuery($dql);
+			$notifier = $query->getResult();
+
+			$alerts = array();
+
+			if ($update) 
+			{
+				$dangerA = array();
+				$riskA = array();
+				$longDanger = $longRisk = 0;
+			}
+			
+			foreach ($notifier as $n) 
+			{
+				$station = $n->getIdMonitoringEvent()->getIdBlockSensor()->getIdBlock();
+				$sensor = $n->getIdMonitoringEvent()->getIdBlockSensor()->getIdSensor();
+				$idEvent = $n->getIdMonitoringEvent->getIdMonitoringEvent();
+				$eventDate = $n->getIdMonitoringEvent()->getIdMeasurement()->getDate()->format('M-d H:i:s');
+				$eventType = $n->getIdMonitoringEvent()->getIdEventType()->getAlertType();
+				$eventName = $n->getIdMonitoringEvent()->getIdEventType()->getEventName();
+
+				$dql = "SELECT p FROM AppBundle:Blocks p WHERE p.id = ".$station->getIdParentBlock();
+				$query = $em->createQuery($dql);
+				$process = $query->getResult();
+
+				if ($update) 
+				{
+					if ($eventType == 'danger')
+					{
+						$longDanger++;
+						$dangerA[] = array("id"=>$idEvent, "idProcessBlock"=>$process[0]->getId(), "ProcessBlock"=>$process[0]->getBlockCodename(), "idStationBlock"=>$station->getId(), "StationBlock"=>$station->getBlockCodename(), "idSensor"=>$sensor->getIdSensor(), "Sensor"=>$sensor->getCodename(), "Message"=>$eventName, "Date"=>$eventDate);
+					} else if($eventType == 'risk')
+					{
+						$longRisk++;
+						$riskA[] = array("id"=>$idEvent, "idProcessBlock"=>$process[0]->getId(), "ProcessBlock"=>$process[0]->getBlockCodename(), "idStationBlock"=>$station->getId(), "StationBlock"=>$station->getBlockCodename(), "idSensor"=>$sensor->getIdSensor(), "Sensor"=>$sensor->getCodename(), "Message"=>$eventName, "Date"=>$eventDate);
+					}
+				} else 
+				{
+					if ($eventType == 'danger') 
+					{
+						$eventNum = 1;	
+					} else if ($eventType == 'risk') 
+					{
+						$eventNum = 0;	
+					}
 					
 
+					$alerts[] = array("idProcessBlock"=>$process[0]->getId(), "idStationBlock"=>$station->getId(), "idNotification"=>$n->getIdNotificationAlert(), "Message"=>$process[0]->getBlockName()." problemas en estacion: ".$station->getBlockCodeName().", sensor: ".$sensor->getCodename(), "Date"=>$eventDate, "AlertType"=>$eventNum);
+				}
+			}
+
+			if ($update) 
+			{
+				return array("LongDanger"=>$longDanger, "LongRisk"=>$longRisk, "Danger"=>$dangerA, "Risk"=>$riskA);	
+			} else 
+			{
+				return array("Long"=>count($notifier), "Alert"=>$alerts);
+			}
+			
+		}
+				
 		public function countDangerAndRisks($events=null)
 		{
 			$risk = $danger = 0;
@@ -340,7 +409,14 @@
 				$query = $em->createQuery($dql);
 				$lastMeasurements = $query->getResult();
 
-			}else 
+			}elseif ($this->useDateInterval) 
+			{
+				$dql = "SELECT m FROM AppBundle:Measurement m WHERE m.idSensor = ".$Sensor->getIdSensor()." AND m.date BETWEEN '".$this->useDateInterval['date1']->format('Y-m-d H:i:s')."' AND '".$this->useDateInterval['date2']->format('Y-m-d H:i:s')."'";
+				$query = $em->createQuery($dql);
+				$lastMeasurements = $query->getResult();
+
+			}
+			else 
 			{
 				$dql = "SELECT m FROM AppBundle:Measurement m WHERE m.idSensor = ".$Sensor->getIdSensor()." ORDER BY m.idMeasurement DESC";
 				$query = $em->createQuery($dql);
@@ -425,11 +501,16 @@
 
 		public function sensorBasicStat(&$sensor_array, $values)
 		{
-			//Sensor Mean, max and min from values
-			$stat = $this->MeanMaxMinValue($values);
-			$sensor_array["MeanValue"] = $stat['mean'];
-			$sensor_array["MinValue"] = $stat['min'];
-			$sensor_array["MaxValue"] = $stat['max'];
+			$sensor_array["MeanValue"] = $sensor_array["MinValue"] = $sensor_array["MaxValue"] = null;
+			if ($values) 
+			{	
+				//Sensor Mean, max and min from values
+				$stat = $this->MeanMaxMinValue($values);
+				$sensor_array["MeanValue"] = $stat['mean'];
+				$sensor_array["MinValue"] = $stat['min'];
+				$sensor_array["MaxValue"] = $stat['max'];
+				$sensor_array["Tendencia"] = $stat['tend'];
+			}
 		}
 
 		public function sensorLimits( &$sensor_array, $Bsensor = null )
@@ -444,10 +525,52 @@
 		{
 			$values=array();
 			$dates=array();
-			foreach ($measurements as $measure) 
+			if ($this->useDateInterval) 
 			{
-				$values[] = $measure->getValue();
-				$dates[] = $measure->getDate()->format('H:i:s');
+				$len = count($measurements);
+				$elemntsPerInterval = intval($len/4);
+				if ($elemntsPerInterval>0) 
+				{
+					$all = array_chunk($measurements, $elemntsPerInterval);
+					$len2 = count($all);
+					$i = 0;
+
+					for ($i=0; $i < $len2; $i++) 
+					{ 
+						if ($i == $len2-2) 
+						{
+							$temp = array_merge($all[$i], $all[$i+1]);
+							//$temp = $this->MeanMaxMinValue($m);	
+							$values[] = $this->MeanMaxMinValue($temp)['mean'];
+							$dates[] = $temp[intval(count($temp)/2)]->getDate()->format('H:i:s');	
+
+							break;
+						} else 
+						{
+							//$temp = $this->MeanMaxMinValue($m);	
+							$values[] = $this->MeanMaxMinValue($all[$i])['mean'];
+							$dates[] = $all[$i][intval($elemntsPerInterval/2.0)]->getDate()->format('H:i:s');
+
+						}
+						
+					}
+				} 
+				else 
+				{
+					foreach ($measurements as $measure) 
+					{
+						$values[] = $measure->getValue();
+						$dates[] = $measure->getDate()->format('H:i:s');
+					}
+				}			
+			} 
+			else 
+			{
+				foreach ($measurements as $measure) 
+				{
+					$values[] = $measure->getValue();
+					$dates[] = $measure->getDate()->format('H:i:s');
+				}
 			}
 
 			$sensor_array["Data"] = array("Time"=> $dates, "Value"=> $values);
@@ -466,7 +589,9 @@
 				$cont++;
 			}
 
-			return array("mean"=>$mean/$cont,"max"=>$maxVal, "min"=>$minVal);
+			$mean = $mean/$cont;
+			$tend = 100*($measurements[0]->getValue()-$mean)/$mean;
+			return array("mean"=>$mean,"max"=>$maxVal, "min"=>$minVal, "tend"=>$tend);
 
 		}
 

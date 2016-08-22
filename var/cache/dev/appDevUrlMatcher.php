@@ -100,6 +100,19 @@ class appDevUrlMatcher extends Symfony\Bundle\FrameworkBundle\Routing\Redirectab
 
         }
 
+        if (0 === strpos($pathinfo, '/history')) {
+            // eventsReport
+            if ($pathinfo === '/history/events') {
+                return array (  '_controller' => 'AppBundle\\Controller\\HistoricalReportController::EventReport',  '_route' => 'eventsReport',);
+            }
+
+            // infoAction
+            if (0 === strpos($pathinfo, '/history/form') && preg_match('#^/history/form/(?P<fecha>[^/]++)$#s', $pathinfo, $matches)) {
+                return $this->mergeDefaults(array_replace($matches, array('_route' => 'infoAction')), array (  '_controller' => 'AppBundle\\Controller\\HistoricalReportController::StaticInfoAction',));
+            }
+
+        }
+
         if (0 === strpos($pathinfo, '/m')) {
             // mailing
             if (0 === strpos($pathinfo, '/mailing') && preg_match('#^/mailing/(?P<codeSchedule>[^/]++)/(?P<schedule>[^/]++)$#s', $pathinfo, $matches)) {
@@ -220,11 +233,6 @@ class appDevUrlMatcher extends Symfony\Bundle\FrameworkBundle\Routing\Redirectab
                     return array (  '_controller' => 'AppBundle\\Controller\\PlatformController::AlertUpdateAction',  '_route' => 'alertDataUpdate',);
                 }
 
-            }
-
-            // DataStatistics
-            if (0 === strpos($pathinfo, '/dashboard/statistics') && preg_match('#^/dashboard/statistics/(?P<date1>[^/]++)/(?P<date2>[^/]++)$#s', $pathinfo, $matches)) {
-                return $this->mergeDefaults(array_replace($matches, array('_route' => 'DataStatistics')), array (  '_controller' => 'AppBundle\\Controller\\PlatformController::DateStatistics',));
             }
 
         }
