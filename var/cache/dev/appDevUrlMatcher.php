@@ -107,8 +107,8 @@ class appDevUrlMatcher extends Symfony\Bundle\FrameworkBundle\Routing\Redirectab
             }
 
             // infoAction
-            if (0 === strpos($pathinfo, '/history/form') && preg_match('#^/history/form/(?P<fecha>[^/]++)$#s', $pathinfo, $matches)) {
-                return $this->mergeDefaults(array_replace($matches, array('_route' => 'infoAction')), array (  '_controller' => 'AppBundle\\Controller\\HistoricalReportController::StaticInfoAction',));
+            if ($pathinfo === '/history/form') {
+                return array (  '_controller' => 'AppBundle\\Controller\\HistoricalReportController::StaticInfoAction',  '_route' => 'infoAction',);
             }
 
         }
