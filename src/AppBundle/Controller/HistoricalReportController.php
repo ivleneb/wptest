@@ -32,37 +32,13 @@
 
     		$request = Request::createFromGlobals();
 
-    		//$keys = $request->request->keys();
-    		//$content = $request->getContent();
+
     		$date1 = $request->request->get('date1');
     		$date2 = $request->request->get('date2');
-    		//$data = $request->request->all();
+    		
+    		$d1 = \DateTime::createFromFormat('Y-m-d H:i:s', $date1);
 
-    		/*$arr = array($content, $keys, $date1, $date2, $data);
-
-    		$encoders = array(new JsonEncoder());
-			$normalizers = array(new ObjectNormalizer());
-
-			$serializer = new Serializer($normalizers, $encoders);
-
-			$jsonContent = $serializer->serialize($arr, 'json');
-
-			//return new Response($jsonContent);
-
-    		*/$d1 = \DateTime::createFromFormat('Y-m-d H:i:s', $date1 /*$parameters['date1']*/);
-    		/*if(!$d1)
-    		{
-				return new Response($jsonContent);
-				//return new Response(json_encode($date1));
-    		}*/
-			//$d1->getTimestamp();
-    		$d2 = date_create_from_format('Y-m-d H:i:s', $date2 /*$parameters['date2']*/);
-			//$d2->getTimestamp();
-			/*if(!$d2)
-    		{
-				return new Response($jsonContent);
-				//eturn new Response(json_encode($date1));
-    		}*/
+    		$d2 = date_create_from_format('Y-m-d H:i:s', $date2);
 			
     		$lD = $this->get('app.dataloader');
 	    	$lD->setupUser($user);

@@ -47,14 +47,12 @@
 					
 					$evm = $this->get('app.event_manager');
 					$ntf = $evm->fireNotifierEvents($measurement);
-					//return new Response(json_encode($ntf));
 					$notifications = array_merge($notifications, $ntf);
 				}
 
 				$ml = $this->get('app.mailer');
-				//$ml->sendNewNotifications($notifications);
+				$ml->sendNewNotifications($notifications);
 
-				//return new Response(json_encode($notifications));
 				return new Response("<!DOCTYPE html>
 				<html>
 				<head>

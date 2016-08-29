@@ -40,7 +40,7 @@
 		}
 
 		/**
-		 * @Route("/about")
+		 * @Route("/about", name = 'about')
 		 */
 
 		public function aboutAction()
@@ -49,7 +49,7 @@
 		}
 
 		/**
-		 * @Route("/contact")
+		 * @Route("/contact", name = 'contact')
 		 */
 
 		public function contactAction()
@@ -58,7 +58,7 @@
 		}
 
 		/**
-		 * @Route("/freestations")
+		 * @Route("/freestations", name = 'freeStations')
 		 */
 
 		public function freestationsAction()
